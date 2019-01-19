@@ -1,0 +1,15 @@
+{
+    "files.exclude": {
+        "src/*.o": true,
+        "src/openhybrid": true
+    },
+    "files.associations": {
+        "openhybrid.h": "c",
+        "grecp_accept.h": "c",
+        "stdlib.h": "c",
+        "udp.h": "c",
+        "dhcp.h": "c",
+        "debug.h": "c",
+        "if_ether.h": "c"
+    }
+}

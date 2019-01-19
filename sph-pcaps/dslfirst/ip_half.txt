@@ -1,0 +1,466 @@
+# ip link show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue state UNKNOWN 
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: ifb0: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN qlen 32
+    link/ether 1a:ca:fe:fe:14:6e brd ff:ff:ff:ff:ff:ff
+3: ifb1: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN qlen 32
+    link/ether 26:d1:f3:f3:a9:1e brd ff:ff:ff:ff:ff:ff
+4: imq0: <NOARP,UP,LOWER_UP> mtu 16000 qdisc pfifo_fast state UNKNOWN qlen 11000
+    link/void 
+5: imq1: <NOARP,UP,LOWER_UP> mtu 16000 qdisc pfifo_fast state UNKNOWN qlen 11000
+    link/void 
+6: tunl0: <NOARP> mtu 1480 qdisc noop state DOWN 
+    link/ipip 0.0.0.0 brd 0.0.0.0
+7: gre0@NONE: <NOARP> mtu 1476 qdisc noop state DOWN 
+    link/gre 0.0.0.0 brd 0.0.0.0
+8: sit0: <NOARP> mtu 1480 qdisc noop state DOWN 
+    link/sit 0.0.0.0 brd 0.0.0.0
+9: ip6tnl0: <NOARP> mtu 1452 qdisc noop state DOWN 
+    link/tunnel6 :: brd ::
+10: ip6gre0@NONE: <NOARP> mtu 1448 qdisc noop state DOWN 
+    link/[823] 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00 brd 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00
+11: dsl0: <> mtu 0 qdisc noop state DOWN 
+    link/[29] 
+12: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noop state UNKNOWN qlen 1000
+    link/ether 04:02:1f:13:7c:54 brd ff:ff:ff:ff:ff:ff
+13: eth0.2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast master br0 state UP qlen 1000
+    link/ether 04:02:1f:13:7c:54 brd ff:ff:ff:ff:ff:ff
+14: eth0.3: <BROADCAST,MULTICAST> mtu 1500 qdisc noop master br0 state DOWN qlen 1000
+    link/ether 04:02:1f:13:7c:54 brd ff:ff:ff:ff:ff:ff
+15: eth0.4: <BROADCAST,MULTICAST> mtu 1500 qdisc noop master br0 state DOWN qlen 1000
+    link/ether 04:02:1f:13:7c:54 brd ff:ff:ff:ff:ff:ff
+16: eth0.5: <BROADCAST,MULTICAST> mtu 1500 qdisc noop master br0 state DOWN qlen 1000
+    link/ether 04:02:1f:13:7c:54 brd ff:ff:ff:ff:ff:ff
+17: nas0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+    link/ether 04:02:1f:13:7c:54 brd ff:ff:ff:ff:ff:ff
+18: wl0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN qlen 1000
+    link/ether 04:02:1f:13:7c:55 brd ff:ff:ff:ff:ff:ff
+19: wl1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN qlen 1000
+    link/ether 04:02:1f:13:7c:56 brd ff:ff:ff:ff:ff:ff
+20: br0: <BROADCAST,MULTICAST,ALLMULTI,UP,LOWER_UP> mtu 1500 qdisc noqueue state UNKNOWN 
+    link/ether 04:02:1f:13:7c:54 brd ff:ff:ff:ff:ff:ff
+21: br1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN 
+    link/ether 46:d6:1d:b5:18:37 brd ff:ff:ff:ff:ff:ff
+22: in_0@nas0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP 
+    link/ether 00:88:00:88:00:88 brd ff:ff:ff:ff:ff:ff
+25: nas_p1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 1000
+    link/ether 04:02:1f:13:7c:54 brd ff:ff:ff:ff:ff:ff
+26: nas_p1_1@nas_p1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP 
+    link/ether 04:02:1f:13:7c:55 brd ff:ff:ff:ff:ff:ff
+27: nas_p1_3.7@nas_p1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP 
+    link/ether 04:02:1f:13:7c:56 brd ff:ff:ff:ff:ff:ff
+28: nas_p1_4.8@nas_p1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP 
+    link/ether 04:02:1f:13:7c:57 brd ff:ff:ff:ff:ff:ff
+35: ppp256: <POINTOPOINT,MULTICAST,NOARP,ALLMULTI,UP,LOWER_UP> mtu 1492 qdisc pfifo_fast state UNKNOWN qlen 20
+    link/ppp 
+# ip -4 addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue state UNKNOWN 
+    inet 127.0.0.1/8 brd 127.255.255.255 scope host lo
+20: br0: <BROADCAST,MULTICAST,ALLMULTI,UP,LOWER_UP> mtu 1500 qdisc noqueue state UNKNOWN 
+    inet 192.168.2.1/24 brd 192.168.2.255 scope global br0
+22: in_0@nas0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP 
+    inet 172.10.10.10/24 brd 172.10.10.255 scope global in_0
+35: ppp256: <POINTOPOINT,MULTICAST,NOARP,ALLMULTI,UP,LOWER_UP> mtu 1492 qdisc pfifo_fast state UNKNOWN qlen 20
+    inet 91.33.26.202 peer 62.155.242.7/32 scope global ppp256
+# ip -6 addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+13: eth0.2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qlen 1000
+    inet6 fe80::602:1fff:fe13:7c54/64 scope link 
+       valid_lft forever preferred_lft forever
+17: nas0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qlen 1000
+    inet6 fe80::602:1fff:fe13:7c54/64 scope link 
+       valid_lft forever preferred_lft forever
+20: br0: <BROADCAST,MULTICAST,ALLMULTI,UP,LOWER_UP> mtu 1500 
+    inet6 2003:c1:c3ce:1526:602:1fff:fe13:7c54/64 scope global 
+       valid_lft forever preferred_lft forever
+    inet6 fe80::1/64 scope link 
+       valid_lft forever preferred_lft forever
+22: in_0@nas0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 
+    inet6 fe80::288:ff:fe88:88/64 scope link 
+       valid_lft forever preferred_lft forever
+25: nas_p1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qlen 1000
+    inet6 fe80::602:1fff:fe13:7c54/64 scope link 
+       valid_lft forever preferred_lft forever
+26: nas_p1_1@nas_p1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 
+    inet6 fe80::602:1fff:fe13:7c55/64 scope link 
+       valid_lft forever preferred_lft forever
+27: nas_p1_3.7@nas_p1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 
+    inet6 fe80::602:1fff:fe13:7c56/64 scope link 
+       valid_lft forever preferred_lft forever
+28: nas_p1_4.8@nas_p1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 
+    inet6 fe80::602:1fff:fe13:7c57/64 scope link 
+       valid_lft forever preferred_lft forever
+35: ppp256: <POINTOPOINT,MULTICAST,NOARP,ALLMULTI,UP,LOWER_UP> mtu 1492 qlen 20
+    inet6 2003:c1:c3bf:e36:602:1fff:fe13:7c56/64 scope global dynamic 
+       valid_lft 14345sec preferred_lft 1745sec
+    inet6 fe80::602:1fff:fe13:7c56/10 scope link 
+       valid_lft forever preferred_lft forever
+ # ip -4 rule show
+0:	from all lookup local 
+1:	from all lookup 201 
+27000:	from 172.17.2.0/24 lookup 270 
+28100:	from all oif gre2 [detached] lookup 100 
+28101:	from 91.33.26.202 lookup 101 
+30001:	from all fwmark 0x80000000/0x80000000 lookup 202 
+30002:	from all lookup 203 
+30003:	from all fwmark 0x40000000/0x40000000 lookup 204 
+30004:	from all fwmark 0x10000000/0x10000000 lookup 204 
+30005:	from all fwmark 0x20000000/0x20000000 lookup 204 
+30006:	from all fwmark 0x20/0x60 lookup 205 
+30007:	from all fwmark 0x40/0x60 lookup 206 
+32766:	from all lookup main 
+32767:	from all lookup default 
+# ip -6 rule show
+0:	from all lookup local 
+1:	from all lookup 201 
+16383:	from 2003:c1:c3bf:e36:602:1fff:fe13:7c56 lookup 100 
+16383:	from all oif ppp256 lookup 100 
+30001:	from all fwmark 0x80000000/0x80000000 lookup 202 
+30003:	from all fwmark 0x40000000/0x40000000 lookup 204 
+30004:	from all fwmark 0x10000000/0x10000000 lookup 204 
+30005:	from all fwmark 0x20000000/0x20000000 lookup 204 
+30006:	from all fwmark 0x20/0x60 lookup 205 
+30007:	from all fwmark 0x40/0x60 lookup 206 
+32766:	from all lookup main 
+# ip -4 route show table 101
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 101
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14342sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table 102
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 102
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14341sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table 103
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 103
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14341sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table 201
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 201
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14341sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table 202
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 202
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14341sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table 203
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 203
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14341sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table 204
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 204
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14340sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table 205
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 205
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14340sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table 206
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 206
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14340sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table default
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table default
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14340sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table main
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table main
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14340sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table local
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table local
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14339sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -4 route show table 270
+default dev ppp256  scope link 
+62.155.242.7 dev ppp256  proto kernel  scope link  src 91.33.26.202 
+172.10.10.0/24 dev in_0  proto kernel  scope link  src 172.10.10.10 
+192.168.2.0/24 dev br0  proto kernel  scope link  src 192.168.2.1 
+ # ip -6 route show table 270
+2003:6:51da:b749::/64 dev br0  proto kernel  metric 256 
+2003:6:51da:b773::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3bf:e36::/64 dev ppp256  proto kernel  metric 256  expires 14339sec
+2003:c1:c3cd:bf49::/64 dev br0  proto kernel  metric 256 
+2003:c1:c3ce:1526::/64 dev br0  proto kernel  metric 256 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1 
+fe80::107:107:3e9b:f207 dev ppp256  metric 1024 
+fe80::d250:99ff:fe29:2ec7 via fe80::d250:99ff:fe29:2ec7 dev br0  metric 0 
+    cache  hoplimit 255
+fe80::/64 dev br0  proto kernel  metric 256 
+fe80::/64 dev nas0  proto kernel  metric 256 
+fe80::/64 dev in_0  proto kernel  metric 256 
+fe80::/64 dev eth0.2  proto kernel  metric 256 
+fe80::/64 dev nas_p1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_1  proto kernel  metric 256 
+fe80::/64 dev nas_p1_3.7  proto kernel  metric 256 
+fe80::/64 dev nas_p1_4.8  proto kernel  metric 256 
+fe80::/64 dev ppp256  proto kernel  metric 256 
+fe80::/10 dev ppp256  proto kernel  metric 256 
+default dev ppp256  metric 512 
+# ip -6 tunnel show gre1
+# ip -6 tunnel show gre2
