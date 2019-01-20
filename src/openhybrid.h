@@ -25,9 +25,9 @@
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include <string.h>
-//#ifndef __USE_POSIX199309
-//  #define __USE_POSIX199309
-//#endif
+#ifndef __USE_POSIX199309
+  #define __USE_POSIX199309
+#endif
 #include <time.h>
 #include <net/if.h>
 
