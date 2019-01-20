@@ -36,12 +36,6 @@ inline struct timeval get_uptime() {
 struct in6_addr get_primary_ip6(char *interface) {
     struct in6_addr ip = {};
 
-    if ((strlen(interface) >= 7) && (interface[4] == ':')) {
-       /* dirty workaround to allow people to pass an ip instead of an interface */
-        inet_pton(AF_INET6, interface, &ip);
-        return ip;
-    }
-
     /* getifaddrs(3) corrups my memory :-/ */
 
     FILE *fd = fopen("/proc/net/if_inet6", "r");
