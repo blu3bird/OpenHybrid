@@ -21,8 +21,8 @@ void read_config(char *path) {
     runtime.log_level = LOG_INFO;
     memcpy(&runtime.lte.interface_name, "wwan0", 5);
     memcpy(&runtime.dsl.interface_name, "ppp0", 4);
-    memcpy(&runtime.lte.gre_interface_name, "gre1", 4);
-    memcpy(&runtime.dsl.gre_interface_name, "gre2", 4);
+    memcpy(&runtime.lte.gre_interface_name, "gre2", 4);
+    memcpy(&runtime.dsl.gre_interface_name, "gre1", 4);
 
     FILE *fp = fopen(path, "r");
     if (!fp) {
