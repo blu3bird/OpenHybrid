@@ -21,8 +21,7 @@ void read_config(char *path) {
     runtime.log_level = LOG_INFO;
     memcpy(&runtime.lte.interface_name, "wwan0", 5);
     memcpy(&runtime.dsl.interface_name, "ppp0", 4);
-    memcpy(&runtime.lte.gre_interface_name, "gre2", 4);
-    memcpy(&runtime.dsl.gre_interface_name, "gre1", 4);
+    memcpy(&runtime.tunnel_interface_name, "tun0", 4);
 
     FILE *fp = fopen(path, "r");
     if (!fp) {
@@ -58,16 +57,10 @@ void read_config(char *path) {
                 memcpy(&runtime.dsl.interface_name, value, strlen(value));
             } else if (strncmp(line, "lte gre interface =", 19) == 0) {
                 if (strlen(value) >= sizeof(runtime.lte.interface_name)) {
-                    logger(LOG_FATAL, "Maximum length for 'lte gre interface' config is %i.\n", sizeof(runtime.lte.gre_interface_name) - 1);
+                    logger(LOG_FATAL, "Maximum length for 'lte gre interface' config is %i.\n", sizeof(runtime.tunnel_interface_name) - 1);
                 }
-                memset(&runtime.lte.gre_interface_name, 0, sizeof(runtime.lte.gre_interface_name));
-                memcpy(&runtime.lte.gre_interface_name, value, strlen(value));
-            } else if (strncmp(line, "dsl gre interface =", 19) == 0) {
-                if (strlen(value) >= sizeof(runtime.dsl.interface_name)) {
-                    logger(LOG_FATAL, "Maximum length for 'dsl gre interface' config is %i.\n", sizeof(runtime.dsl.gre_interface_name) - 1);
-                }
-                memset(&runtime.dsl.gre_interface_name, 0, sizeof(runtime.dsl.gre_interface_name));
-                memcpy(&runtime.dsl.gre_interface_name, value, strlen(value));
+                memset(&runtime.tunnel_interface_name, 0, sizeof(runtime.tunnel_interface_name));
+                memcpy(&runtime.tunnel_interface_name, value, strlen(value));
             } else if (strncmp(line, "bonding =", 9) == 0) {
                 if (strcmp(value, "true") == 0) {
                     runtime.bonding = true;
@@ -98,7 +91,7 @@ void read_config(char *path) {
                 } else if (atoi(value) > 1448) {
                     logger(LOG_FATAL, "Maximum size for 'gre interface mtu' config is 1448.\n");
                 }
-                runtime.gre_interface_mtu = atoi(value);
+                runtime.tunnel_interface_mtu = atoi(value);
             } else if (strncmp(line, "active hello interval =", 23) == 0) {
                 runtime.haap.active_hello_interval = atoi(value);
             } else if (strncmp(line, "hello retry times =", 19) == 0) {
@@ -121,10 +114,10 @@ void read_config(char *path) {
         inet_pton(AF_INET6, "2003:6::1", &runtime.haap.anycast_ip);
     }
     runtime.haap.ip = runtime.haap.anycast_ip;
-    if (!runtime.gre_interface_mtu) {
-        runtime.gre_interface_mtu = 1448; /* 1500 - ipv6 header(40) - gre header(12) */
+    if (!runtime.tunnel_interface_mtu) {
+        runtime.tunnel_interface_mtu = 1448; /* 1500 - ipv6 header(40) - gre header(12) */
         if (runtime.bonding) {
-            runtime.gre_interface_mtu -= 8; /* pppoe header */
+            runtime.tunnel_interface_mtu -= 8; /* pppoe header */
         }
     }
 }

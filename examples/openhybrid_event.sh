@@ -7,14 +7,10 @@
 #    Triggered when OpenHybrid is started.
 # -  shutdown
 #    Triggered when OpenHybrid is stopped.
-# -  tunneldown_lte
-#    Triggered when the tunnel device for the lte tunnel is destroyed.
-# -  tunneldown_dsl
-#    Triggered when the tunnel device for the dsl tunnel is destroyed.
-# -  tunnelup_lte
-#    Triggered when the tunnel device for the lte tunnel is created.
-# -  tunnelup_dsl
-#    Triggered when the tunnel device for the dsl tunnel is created.
+# -  tunneldown
+#    Triggered when the tunnel device is destroyed.
+# -  tunnelup
+#    Triggered when the tunnel device is created.
 # -  dhcpup_ip
 #    Triggered when an ipv4 address is obtained.
 # -  dhcpup_ip6
@@ -28,13 +24,11 @@
 # List of all environment variables:
 # - lte_interface_name
 #   Name of the LTE interface as defined in openhybrid.conf.
-# - lte_gre_interface_name
-#   Name of the LTE tunnel interface as defined in openhybrid.conf.
 # - dsl_interface_name
 #   Name of the DSL interface as defined in openhybrid.conf. Only available in bonding mode.
-# - dsl_gre_interface_name
-#   Name of the DSL tunnel interface as defined in openhybrid.conf. Only available in bonding mode.
-# - gre_interface_mtu
+# - tunnel_interface_name
+#   Name of the tunnel interface as defined in openhybrid.conf. Only available in bonding mode.
+# - tunnel_interface_mtu
 #   MTU of the tunnel interfaces.
 # - dhcp_ip
 #   Public IPv4 address obtained via dhcp.
@@ -56,71 +50,55 @@
 # Note: Use 'replace' instead of 'add' and 'flush' instead of 'delete', if possible.
 case "${1}" in
     # when a tunnel device is created or an ip/prefix is obtained
-    tunnelup_*|dhcpup_*)
-        # execute the commands below for all configured interfaces
-        for dev in ${lte_gre_interface_name} ${dsl_gre_interface_name}
-        do
-	        # skip if interface does not exist
-            ip link show $dev &> /dev/null || continue
+    tunnelup|dhcpup_*)
+        # if we have an ipv4 addres
+        if [ -n "${dhcp_ip}" ]
+        then
+            # assign it to the device
+            ip -4 address replace ${dhcp_ip}/32 dev $tunnel_interface_name
 
-            # use different metrics for lte and dsl, this way we have an automatic failover an we don't have to deal with rp_filter (ipv4)
-            [ "${dev}" = "${dsl_gre_interface_name}" ] && metric=1 || metric=2
+            # and add routes for heise.de and speed.hetzner.de, use ip's since we may not have a working DNS
+            for dst in 193.99.144.80 88.198.248.254
+            do
+                ip -4 route replace $dst dev $tunnel_interface_name
+            done
+        fi
 
-            # if we have an ipv4 addres
-            if [ -n "${dhcp_ip}" ]
-            then
-	            # assign it to the device
-                ip -4 address replace ${dhcp_ip}/32 dev $dev
+        # if we have an ipv6 prefix
+        if [ "${dhcp6_prefix_address}" != "::" ]
+        then
+            # assign the first ip of the prefix to the device
+            ip -6 address replace ${dhcp6_prefix_address}1/128 dev $tunnel_interface_name
 
-                # and add routes for heise.de and speed.hetzner.de, use ip's since we may not have a working DNS
-                for dst in 193.99.144.80 88.198.248.254
-                do
-                    ip -4 route replace $dst dev $dev metric $metric
-                done
-            fi
-
-            # if we have an ipv6 prefix
-            if [ "${dhcp6_prefix_address}" != "::" ]
-            then
-	            # assign the first ip of the prefix to the device
-                ip -6 address replace ${dhcp6_prefix_address}1/128 dev $dev
-
-                # and add routes for heise.de and speed.hetzner.de, use ip's since we may not have a working DNS
-                for dst in 2a02:2e0:3fe:1001:302:: 2a01:4f8:0:59ed::2
-                do
-                    ip -6 route replace $dst dev $dev metric $metric
-                done
-            fi
-        done
+            # and add routes for heise.de and speed.hetzner.de, use ip's since we may not have a working DNS
+            for dst in 2a02:2e0:3fe:1001:302:: 2a01:4f8:0:59ed::2
+            do
+                ip -6 route replace $dst dev $tunnel_interface_name
+            done
+        fi
         ;;
     # when a dhcp lease (ipv4) expires
     dhcpdown_ip)
-        # execute the commands below for all configured interfaces
-        for dev in $lte_gre_interface_name $dsl_gre_interface_name
-        do
-	        # skip if interface does not exist
-            ip link show $dev &> /dev/null || continue
-
+        # tunnel device may have already been removed if OpenHybrid is shutting down
+        if ip link show $tunnel_interface_name &> /dev/null
+        then
             # delete routes and ips
-            ip -4 route flush dev $dev
-            ip -4 address flush dev $dev
-        done
+            ip -4 route flush dev $tunnel_interface_name
+            ip -4 address flush dev $tunnel_interface_name
+        fi
         ;;
     # when a dhcp lease (ipv6) expires
     dhcpdown_ip6)
-        # execute the commands below for all configured interfaces
-        for dev in $lte_gre_interface_name $dsl_gre_interface_name
-        do
-	        # skip if interface does not exist
-            ip link show $dev &> /dev/null || continue
-
+        # tunnel device may have already been removed if OpenHybrid is shutting down
+        if ip link show $tunnel_interface_name &> /dev/null
+        then
             # delete routes and (global) ips
-            ip -6 route flush dev $dev
-            ip -6 address flush dev $dev scope global
-        done
+            ip -6 route flush dev $tunnel_interface_name
+            ip -6 address flush dev $tunnel_interface_name
+        fi
         ;;
     # when a tunnel device is destroyed
-    tunneldown_*)
+    tunneldown)
         # Addresses and routes linked to a device will automatically be removed if the device is removed
         ;;
 esac

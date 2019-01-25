@@ -21,7 +21,7 @@
 #include <linux/if_tunnel.h>
 #include <linux/ip6_tunnel.h>
 
-bool create_tunnel_dev(uint8_t tuntype) {
+bool create_tunnel_dev() {
     struct mnl_socket *nl_sock = NULL;
     if ((nl_sock = mnl_socket_open(NETLINK_ROUTE)) == NULL) {
         logger(LOG_ERROR, "Opening netlink socket failed: %s\n", strerror(errno));
@@ -39,23 +39,15 @@ bool create_tunnel_dev(uint8_t tuntype) {
     ifinfo->ifi_change = IFF_UP;
     ifinfo->ifi_flags = IFF_UP;
 
-    if (tuntype == GRECP_TUNTYPE_LTE) {
-        mnl_attr_put_str(nlh, IFLA_IFNAME, runtime.lte.gre_interface_name);
-    } else {
-        mnl_attr_put_str(nlh, IFLA_IFNAME, runtime.dsl.gre_interface_name);
-    }
-    mnl_attr_put_u32(nlh, IFLA_MTU, runtime.gre_interface_mtu);
+    mnl_attr_put_str(nlh, IFLA_IFNAME, runtime.tunnel_interface_name);
+    mnl_attr_put_u32(nlh, IFLA_MTU, runtime.tunnel_interface_mtu);
 
     struct nlattr *linkinfo = mnl_attr_nest_start(nlh, IFLA_LINKINFO);
     mnl_attr_put_str(nlh, IFLA_INFO_KIND, "ip6gre");
 
     struct nlattr *tunnelinfo = mnl_attr_nest_start(nlh, IFLA_INFO_DATA);
     struct sockaddr_in6 addr = {};
-    if (tuntype == GRECP_TUNTYPE_LTE) {
-        addr.sin6_addr = get_primary_ip6(runtime.lte.interface_name);
-    } else {
-        addr.sin6_addr = get_primary_ip6(runtime.dsl.interface_name);
-    }
+    addr.sin6_addr = get_primary_ip6(runtime.lte.interface_name);
     mnl_attr_put(nlh, IFLA_GRE_LOCAL, sizeof(addr.sin6_addr), &addr.sin6_addr);
     mnl_attr_put(nlh, IFLA_GRE_REMOTE, sizeof(runtime.haap.ip), &runtime.haap.ip);
     mnl_attr_put_u32(nlh, IFLA_GRE_FLAGS, IP6_TNL_F_IGN_ENCAP_LIMIT);
@@ -76,26 +68,17 @@ bool create_tunnel_dev(uint8_t tuntype) {
     if (nlh->nlmsg_type == NLMSG_ERROR) {
         struct nlmsgerr *nlerr = mnl_nlmsg_get_payload(nlh);
         if (nlerr->error) {
-            if (tuntype == GRECP_TUNTYPE_LTE) {
-                logger(LOG_ERROR, "Creation of LTE Tunnel interface '%s' failed: %s\n", runtime.lte.gre_interface_name, strerror(-nlerr->error));
-            } else {
-                logger(LOG_ERROR, "Creation of DSL Tunnel interface '%s' failed: %s\n", runtime.dsl.gre_interface_name, strerror(-nlerr->error));
-            }
+            logger(LOG_ERROR, "Creation of Tunnel interface '%s' failed: %s\n", runtime.tunnel_interface_name, strerror(-nlerr->error));
             return false;
         }
     }
 
-    if (tuntype == GRECP_TUNTYPE_LTE) {
-        logger(LOG_INFO, "LTE Tunnel interface '%s' created.\n", runtime.lte.gre_interface_name);
-        trigger_event("tunnelup_lte");
-    } else {
-        logger(LOG_INFO, "DSL Tunnel interface '%s' created.\n", runtime.dsl.gre_interface_name);
-        trigger_event("tunnelup_dsl");
-    }
+    logger(LOG_INFO, "Tunnel interface '%s' created.\n", runtime.tunnel_interface_name);
+    trigger_event("tunnelup");
     return true;
 }
 
-bool destroy_tunnel_dev(uint8_t tuntype) {
+bool destroy_tunnel_dev() {
     struct mnl_socket *nl_sock;
     if ((nl_sock = mnl_socket_open(NETLINK_ROUTE)) == NULL) {
         logger(LOG_ERROR, "Opening netlink socket failed: %s\n", strerror(errno));
@@ -110,11 +93,7 @@ bool destroy_tunnel_dev(uint8_t tuntype) {
     struct ifinfomsg *ifinfo = mnl_nlmsg_put_extra_header(nlh, sizeof(struct ifinfomsg));
     ifinfo->ifi_family = AF_UNSPEC;
 
-    if (tuntype == GRECP_TUNTYPE_LTE) {
-        mnl_attr_put_str(nlh, IFLA_IFNAME, runtime.lte.gre_interface_name);
-    } else {
-        mnl_attr_put_str(nlh, IFLA_IFNAME, runtime.dsl.gre_interface_name);
-    }
+    mnl_attr_put_str(nlh, IFLA_IFNAME, runtime.tunnel_interface_name);
 
     mnl_socket_sendto(nl_sock, nlh, nlh->nlmsg_len);
     mnl_socket_recvfrom(nl_sock, buf, sizeof(buf));
@@ -123,21 +102,12 @@ bool destroy_tunnel_dev(uint8_t tuntype) {
     if (nlh->nlmsg_type == NLMSG_ERROR){
         struct nlmsgerr *nlerr = mnl_nlmsg_get_payload(nlh);
         if (nlerr->error) {
-            if (tuntype == GRECP_TUNTYPE_LTE) {
-                logger(LOG_ERROR, "Destruction of LTE Tunnel interface '%s' failed: %s\n", runtime.lte.gre_interface_name, strerror(-nlerr->error));
-            } else {
-                logger(LOG_ERROR, "Destruction of DSL Tunnel interface '%s' failed: %s\n", runtime.dsl.gre_interface_name, strerror(-nlerr->error));
-            }
+            logger(LOG_ERROR, "Destruction of Tunnel interface '%s' failed: %s\n", runtime.tunnel_interface_name, strerror(-nlerr->error));
             return false;
         }
     }
 
-    if (tuntype == GRECP_TUNTYPE_LTE) {
-        logger(LOG_INFO, "LTE Tunnel interface '%s' destroyed.\n", runtime.lte.gre_interface_name);
-        trigger_event("tunneldown_lte");
-    } else {
-        logger(LOG_INFO, "DSL Tunnel interface '%s' destroyed.\n", runtime.dsl.gre_interface_name);
-        trigger_event("tunneldown_dsl");
-    }
+    logger(LOG_INFO, "LTE Tunnel interface '%s' destroyed.\n", runtime.tunnel_interface_name);
+    trigger_event("tunneldown");
     return true;
 }

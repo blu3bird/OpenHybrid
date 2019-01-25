@@ -75,7 +75,7 @@ pid_t start_udhcpc() {
         dup2(udhcpc_pipe[1], STDERR_FILENO);
         execl("/bin/busybox",
             "udhcpc",
-            "-i", runtime.lte.gre_interface_name,
+            "-i", runtime.tunnel_interface_name,
             "-s", dhcp_script_path,
             "-n",
             "-q",
@@ -107,7 +107,7 @@ pid_t start_udhcpc6() {
         dup2(udhcpc6_pipe[1], STDERR_FILENO);
         execl("/bin/busybox",
             "udhcpc6",
-            "-i", runtime.lte.gre_interface_name,
+            "-i", runtime.tunnel_interface_name,
             "-s", dhcp_script_path,
             "-f",
             "-n",

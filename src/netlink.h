@@ -14,5 +14,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-bool create_tunnel_dev(uint8_t tuntype);
-bool destroy_tunnel_dev(uint8_t tuntype);
+bool create_tunnel_dev();
+bool destroy_tunnel_dev();

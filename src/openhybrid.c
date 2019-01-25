@@ -102,14 +102,14 @@ void execute_timers() {
     }
 
     /* reset stats in case of tear down, hello failure and such */
-    if ((!runtime.lte.tunnel_established) && (runtime.lte.gre_interface_created)) {
+    if ((!runtime.lte.tunnel_established) && (runtime.tunnel_interface_created)) {
         runtime.lte.tunnel_established = false;
         runtime.lte.missed_hellos = 0;
         runtime.lte.last_hello_sent = 0;
         runtime.lte.last_hello_received = 0;
         runtime.lte.tunnel_verification_required = false;
     }
-    if ((!runtime.dsl.tunnel_established) && (runtime.dsl.gre_interface_created)) {
+    if ((!runtime.dsl.tunnel_established) && (runtime.tunnel_interface_created)) {
         runtime.dsl.tunnel_established = false;
         runtime.dsl.missed_hellos = 0;
         runtime.dsl.last_hello_sent = 0;
@@ -145,19 +145,14 @@ void execute_timers() {
     }
 
     /* create/destroy tunnel devices */
-    if ((runtime.lte.tunnel_established) && (!runtime.lte.gre_interface_created)) {
-        runtime.lte.gre_interface_created = create_tunnel_dev(GRECP_TUNTYPE_LTE);
-    } else if ((!runtime.lte.tunnel_established) && (runtime.lte.gre_interface_created)) {
-        runtime.lte.gre_interface_created = !destroy_tunnel_dev(GRECP_TUNTYPE_LTE);
-    }
-    if ((runtime.dsl.tunnel_established) && (!runtime.dsl.gre_interface_created)) {
-        runtime.dsl.gre_interface_created = create_tunnel_dev(GRECP_TUNTYPE_DSL);
-    } else if ((!runtime.dsl.tunnel_established) && (runtime.dsl.gre_interface_created)) {
-        runtime.dsl.gre_interface_created = !destroy_tunnel_dev(GRECP_TUNTYPE_DSL);
+    if (((runtime.lte.tunnel_established) || (runtime.dsl.tunnel_established)) && (!runtime.tunnel_interface_created)) {
+        runtime.tunnel_interface_created = create_tunnel_dev();
+    } else if ((!runtime.lte.tunnel_established) && (!runtime.dsl.tunnel_established) && (runtime.tunnel_interface_created)) {
+        runtime.tunnel_interface_created = !destroy_tunnel_dev();
     }
 
     /* DHCP */
-    if ((runtime.lte.gre_interface_created) && (!runtime.dhcp.lease_time) && (!runtime.dhcp.udhcpc_pid))
+    if ((runtime.tunnel_interface_created) && (!runtime.dhcp.lease_time) && (!runtime.dhcp.udhcpc_pid))
         runtime.dhcp.udhcpc_pid = start_udhcpc();
     if (runtime.dhcp.udhcpc_pid) {
         int status;
@@ -172,7 +167,7 @@ void execute_timers() {
         }
     }
     /* DHCP6 */
-    if ((runtime.lte.gre_interface_created) && (!runtime.dhcp6.lease_time) && (!runtime.dhcp6.udhcpc6_pid))
+    if ((runtime.tunnel_interface_created) && (!runtime.dhcp6.lease_time) && (!runtime.dhcp6.udhcpc6_pid))
         runtime.dhcp6.udhcpc6_pid = start_udhcpc6();
     if (runtime.dhcp6.udhcpc6_pid) {
         int status;
@@ -223,10 +218,8 @@ void execute_timers() {
                     trigger_event("dhcpdown_ip6");
 
                 /* remove interfaces */
-                if (runtime.lte.gre_interface_created)
-                    destroy_tunnel_dev(GRECP_TUNTYPE_LTE);
-                if (runtime.dsl.gre_interface_created)
-                    destroy_tunnel_dev(GRECP_TUNTYPE_DSL);
+                if (runtime.tunnel_interface_created)
+                    destroy_tunnel_dev();
 
                 /* Protocol doesn't support disconnect. We can exploit the 'link failure' notify message but that only works if both tunnels are up */
                 if ((runtime.lte.tunnel_established) && (runtime.dsl.tunnel_established)) {

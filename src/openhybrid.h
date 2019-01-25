@@ -69,7 +69,9 @@ struct {
     bool bonding;
     bool filter_list_acked;
     uint8_t log_level;
-    uint16_t gre_interface_mtu;
+    uint16_t tunnel_interface_mtu;
+    bool tunnel_interface_created;
+    char tunnel_interface_name[IF_NAMESIZE + 1];
     volatile int signal;
     char event_script_path[128];
     struct {
@@ -87,9 +89,7 @@ struct {
     } dhcp6;
     struct {
         char interface_name[IF_NAMESIZE + 1];
-        char gre_interface_name[IF_NAMESIZE + 1];
         bool tunnel_established;
-        bool gre_interface_created;
         time_t last_hello_sent;
         time_t last_hello_received;
         uint8_t missed_hellos;
@@ -97,9 +97,7 @@ struct {
     } lte;
     struct {
         char interface_name[IF_NAMESIZE + 1];
-        char gre_interface_name[IF_NAMESIZE + 1];
         bool tunnel_established;
-        bool gre_interface_created;
         time_t last_hello_sent;
         time_t last_hello_received;
         uint8_t missed_hellos;

@@ -46,14 +46,13 @@ void trigger_event(char *name) {
 
             /* Interfaces */
             sprintf(env[i++], "lte_interface_name=%s", runtime.lte.interface_name);
-            sprintf(env[i++], "lte_gre_interface_name=%s", runtime.lte.gre_interface_name);
             if (runtime.bonding) {
                 sprintf(env[i++], "dsl_interface_name=%s", runtime.dsl.interface_name);
-                sprintf(env[i++], "dsl_gre_interface_name=%s", runtime.dsl.gre_interface_name);
             }
+            sprintf(env[i++], "tunnel_interface_name=%s", runtime.tunnel_interface_name);
 
             /* MTU */
-            sprintf(env[i++], "gre_interface_mtu=%u", runtime.gre_interface_mtu);
+            sprintf(env[i++], "tunnel_interface_mtu=%u", runtime.tunnel_interface_mtu);
 
             /* DHCP */
             inet_ntop(AF_INET, &runtime.dhcp.ip, straddr, INET_ADDRSTRLEN);
