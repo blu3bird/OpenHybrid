@@ -49,33 +49,31 @@
 # This is probably as minimalistic as it gets.
 # Note: Use 'replace' instead of 'add' and 'flush' instead of 'delete', if possible.
 case "${1}" in
-    # when a tunnel device is created or an ip/prefix is obtained
-    tunnelup|dhcpup_*)
-        # if we have an ipv4 addres
-        if [ -n "${dhcp_ip}" ]
-        then
-            # assign it to the device
-            ip -4 address replace ${dhcp_ip}/32 dev $tunnel_interface_name
+    # when a tunnel device is created
+    tunnelup)
+        # Not much we can do with the device itself. The real actions begins once we get a DHCP ip...
+        ;;
+    # when an ipv4 address is obtained
+    dhcpup_ip)
+        # assign it to the device
+        ip -4 address replace ${dhcp_ip}/32 dev $tunnel_interface_name
 
-            # and add routes for heise.de and speed.hetzner.de, use ip's since we may not have a working DNS
-            for dst in 193.99.144.80 88.198.248.254
-            do
-                ip -4 route replace $dst dev $tunnel_interface_name
-            done
-        fi
+        # and add routes for heise.de and speed.hetzner.de, use ip's since we may not have a working DNS
+        for dst in 193.99.144.80 88.198.248.254
+        do
+            ip -4 route replace $dst dev $tunnel_interface_name
+        done
+        ;;
+    # when an ipv6 prefix is obtained
+    dhcpup_ip6)
+        # assign the first ip of the prefix to the device (TODO: use real math to calculcate the first usable ip)
+        ip -6 address replace ${dhcp6_prefix_address}1/128 dev $tunnel_interface_name
 
-        # if we have an ipv6 prefix
-        if [ "${dhcp6_prefix_address}" != "::" ]
-        then
-            # assign the first ip of the prefix to the device
-            ip -6 address replace ${dhcp6_prefix_address}1/128 dev $tunnel_interface_name
-
-            # and add routes for heise.de and speed.hetzner.de, use ip's since we may not have a working DNS
-            for dst in 2a02:2e0:3fe:1001:302:: 2a01:4f8:0:59ed::2
-            do
-                ip -6 route replace $dst dev $tunnel_interface_name
-            done
-        fi
+        # and add routes for heise.de and speed.hetzner.de, use ip's since we may not have a working DNS
+        for dst in 2a02:2e0:3fe:1001:302:: 2a01:4f8:0:59ed::2
+        do
+            ip -6 route replace $dst dev $tunnel_interface_name
+        done
         ;;
     # when a dhcp lease (ipv4) expires
     dhcpdown_ip)
