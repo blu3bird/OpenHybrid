@@ -10,6 +10,7 @@
         "udp.h": "c",
         "dhcp.h": "c",
         "debug.h": "c",
-        "if_ether.h": "c"
+        "if_ether.h": "c",
+        "if_tun.h": "c"
     }
 }

@@ -40,7 +40,7 @@
 #include "grecp_notify.h"
 #include "grecp_teardown.h"
 #include "helpers.h"
-#include "netlink.h"
+#include "tundev.h"
 #include "config.h"
 #include "logging.h"
 #include "dhcp.h"
