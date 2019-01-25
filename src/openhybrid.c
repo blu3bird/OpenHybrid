@@ -257,13 +257,6 @@ int main(int argc, char **argv, char **envp) {
         return(EXIT_FAILURE);
     }
     read_config(argv[1]);
-
-    create_tunnel_dev();
-    sleep(5);
-    destroy_tunnel_dev();
-    //sleep(10);
-
-    exit(0);
    
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
