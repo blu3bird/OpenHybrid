@@ -7,7 +7,7 @@
             "request": "launch",
             "preLaunchTask": "Build Debug",
             "program": "${workspaceFolder}/src/openhybrid",
-            "args": [],
+            "args": ["openhybrid.conf"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/src",
             "environment": [],
