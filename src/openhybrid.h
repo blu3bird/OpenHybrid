@@ -74,7 +74,7 @@ struct {
     uint8_t log_level;
     uint16_t tunnel_interface_mtu;
     bool tunnel_interface_created;
-    char tunnel_interface_name[IF_NAMESIZE + 1];
+    char tunnel_interface_name[IF_NAMESIZE];
     pthread_t gre2tun_thread;
     pthread_t tun2gre_thread;
     volatile int signal;
@@ -93,7 +93,7 @@ struct {
         time_t lease_obtained;
     } dhcp6;
     struct {
-        char interface_name[IF_NAMESIZE + 1];
+        char interface_name[IF_NAMESIZE];
         bool tunnel_established;
         time_t last_hello_sent;
         time_t last_hello_received;
@@ -102,7 +102,7 @@ struct {
         struct in6_addr interface_ip;
     } lte;
     struct {
-        char interface_name[IF_NAMESIZE + 1];
+        char interface_name[IF_NAMESIZE];
         bool tunnel_established;
         time_t last_hello_sent;
         time_t last_hello_received;

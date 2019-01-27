@@ -43,20 +43,20 @@ void read_config(char *path) {
             if (strncmp(line, "haap anycast ip =", 17) == 0) {
                 inet_pton(AF_INET6, value, &runtime.haap.anycast_ip);
             } else if (strncmp(line, "lte interface =", 15) == 0) {
-                if (strlen(value) >= sizeof(runtime.lte.interface_name)) {
+                if (strlen(value) >= sizeof(runtime.lte.interface_name)-1) {
                     logger(LOG_FATAL, "Maximum length for 'lte interface' config is %i.\n", sizeof(runtime.lte.interface_name) - 1);
                 }
                 memset(&runtime.lte.interface_name, 0, sizeof(runtime.lte.interface_name));
                 memcpy(&runtime.lte.interface_name, value, strlen(value));
             } else if (strncmp(line, "dsl interface =", 15) == 0) {
-                if (strlen(value) >= sizeof(runtime.lte.interface_name)) {
+                if (strlen(value) >= sizeof(runtime.dsl.interface_name)-1) {
                     logger(LOG_FATAL, "Maximum length for 'dsl interface' config is %i.\n", sizeof(runtime.dsl.interface_name) - 1);
                 }
                 memset(&runtime.dsl.interface_name, 0, sizeof(runtime.dsl.interface_name));
                 memcpy(&runtime.dsl.interface_name, value, strlen(value));
-            } else if (strncmp(line, "lte gre interface =", 19) == 0) {
-                if (strlen(value) >= sizeof(runtime.lte.interface_name)) {
-                    logger(LOG_FATAL, "Maximum length for 'lte gre interface' config is %i.\n", sizeof(runtime.tunnel_interface_name) - 1);
+            } else if (strncmp(line, "tunnel interface =", 18) == 0) {
+                if (strlen(value) >= sizeof(runtime.tunnel_interface_name)-1) {
+                    logger(LOG_FATAL, "Maximum length for 'tunnel interface' config is %i.\n", sizeof(runtime.tunnel_interface_name) - 1);
                 }
                 memset(&runtime.tunnel_interface_name, 0, sizeof(runtime.tunnel_interface_name));
                 memcpy(&runtime.tunnel_interface_name, value, strlen(value));
