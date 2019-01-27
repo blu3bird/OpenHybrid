@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _GNU_SOURCE
+
 /* Common includes */
 #include <stdio.h>
 #include <stdlib.h>

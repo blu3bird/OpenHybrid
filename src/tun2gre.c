@@ -91,6 +91,12 @@ void send_gre(uint8_t tuntype, uint16_t proto, uint32_t sequence, void *payload,
 }
 
 void *tun2gre_main() {
+    char trimifname[IF_NAMESIZE-6];
+    char threadname[IF_NAMESIZE];
+    strncpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
+    sprintf(threadname, "%s-send", trimifname);
+    pthread_setname_np(pthread_self(), threadname);
+
     static unsigned char buffer[MAX_PKT_SIZE];
     uint16_t size;
     uint16_t etherproto;
@@ -101,6 +107,9 @@ void *tun2gre_main() {
     bool is_dhcp;
     while (true) {
         is_dhcp = false;
+        if (!sequence)
+            sequence++;
+
         size = read(sockfd_tun, buffer, MAX_PKT_SIZE);
         if (size > 0) {
             //logger_hexdump(LOG_DEBUG, buffer, size, "buffer:");
@@ -134,6 +143,7 @@ void *tun2gre_main() {
                 logger(LOG_CRAZYDEBUG, "tun2gre: Sending %u bytes via LTE (forced)\n", size);
                 send_gre(GRECP_TUNTYPE_LTE, etherproto, 0, buffer + 4, size - 4);
             } else if (runtime.dsl.tunnel_established) {
+                /* TODO: implement overflow to LTE */
                 logger(LOG_CRAZYDEBUG, "tun2gre: Sending %u bytes via DSL\n", size);
                 send_gre(GRECP_TUNTYPE_DSL, etherproto, sequence++, buffer + 4, size - 4);
             } else if (runtime.lte.tunnel_established) {

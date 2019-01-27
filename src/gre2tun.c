@@ -22,6 +22,12 @@
 #include <sys/socket.h>
 
 void *gre2tun_main() {
+    char trimifname[IF_NAMESIZE-6];
+    char threadname[IF_NAMESIZE];
+    strncpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
+    sprintf(threadname, "%s-recv", trimifname);
+    pthread_setname_np(pthread_self(), threadname);
+
     static unsigned char buffer[MAX_PKT_SIZE];
     uint16_t size;
     uint32_t sequence;
@@ -42,6 +48,7 @@ void *gre2tun_main() {
             continue;
         }
 
+        /* extract sequence number and payload offset */
         greh = (struct grehdr *)buffer;
         if (greh->flags_and_version == htons(GRECP_FLAGSANDVERSION_WITH_SEQ)) {
             memcpy(&sequence, buffer + 8, 4);
@@ -61,7 +68,7 @@ void *gre2tun_main() {
         }
 
         logger(LOG_CRAZYDEBUG, "gre2run: Received %u bytes\n", size);
-        if (write(sockfd_tun, buffer + payload_offset - 4, size - payload_offset + 4) < 0) {
+        if (write(sockfd_tun, buffer + payload_offset - 4, size - payload_offset + 4) != size - payload_offset + 4) {
             logger(LOG_ERROR, "Tun device write failed: %s\n", strerror(errno));
         }
     }
