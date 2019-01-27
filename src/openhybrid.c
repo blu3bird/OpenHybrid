@@ -301,11 +301,13 @@ int main(int argc, char **argv, char **envp) {
     open_grecp_socket();
     logger(LOG_INFO, "OpenHybrid started.\n");
     trigger_event("startup");
+
+    unsigned char buffer[MAX_PKT_SIZE];
+    int size;
+    struct sockaddr_in6 saddr;
+    socklen_t saddr_size = sizeof(saddr);
     while (true) {
-        void *buffer = malloc(MAX_PKT_SIZE);
-        struct sockaddr_in6 saddr = {};
-        socklen_t saddr_size = sizeof(saddr);
-        int size = recvfrom(sockfd, buffer, MAX_PKT_SIZE, 0, (struct sockaddr *)&saddr, &saddr_size);
+        size = recvfrom(sockfd, buffer, MAX_PKT_SIZE, 0, (struct sockaddr *)&saddr, &saddr_size);
         if (size < 0) {
             if ((errno != EAGAIN) && (errno != EINTR))
                 logger(LOG_ERROR, "Raw socket receive failed: %s\n", strerror(errno));
@@ -315,7 +317,6 @@ int main(int argc, char **argv, char **envp) {
             } else
                 process_grecpmessage(buffer, size);
         }
-        free(buffer);
 
         execute_timers();
     }

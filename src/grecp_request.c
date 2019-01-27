@@ -17,7 +17,7 @@
 #include "openhybrid.h"
 
 bool send_grecprequest(uint8_t tuntype) {
-    void *buffer = calloc(1, MAX_PKT_SIZE);
+    unsigned char buffer[MAX_PKT_SIZE];
     int size = 0;
 
     if (tuntype == GRECP_TUNTYPE_LTE) {
@@ -45,6 +45,5 @@ bool send_grecprequest(uint8_t tuntype) {
         res = false;
     }
 
-    free(buffer);
     return res;
 }

@@ -17,15 +17,14 @@
 #include "openhybrid.h"
 
 bool send_grecpnotify_filterlistpackageack(uint8_t ackcode) {
-    void *buffer = calloc(1, MAX_PKT_SIZE);
+    unsigned char buffer[MAX_PKT_SIZE];
     int size = 0;
 
     uint32_t commitcount = htonl(runtime.haap.filter_list.commit_count);
-    void *payload = calloc(1, sizeof(commitcount) + 1);
+    unsigned char payload[sizeof(commitcount) + 1];
     memcpy(payload, &commitcount, sizeof(commitcount));
     memset(payload + sizeof(commitcount), ackcode, sizeof(ackcode));
     size += append_grecpattribute(buffer + size, GRECP_MSGATTR_FILTER_LIST_PACKAGE_ACK, sizeof(commitcount) + sizeof(ackcode), payload);
-    free(payload);
     size += append_grecpattribute(buffer + size, GRECP_MSGATTR_PADDING, 0, NULL);
 
     bool res;
@@ -38,12 +37,11 @@ bool send_grecpnotify_filterlistpackageack(uint8_t ackcode) {
         res = false;
     }
 
-    free(buffer);
     return res;
 }
 
 bool send_grecpnotify_tunnelverify() {
-    void *buffer = calloc(1, MAX_PKT_SIZE);
+    unsigned char buffer[MAX_PKT_SIZE];
     int size = 0;
 
     size += append_grecpattribute(buffer + size, GRECP_MSGATTR_TUNNEL_VERIFICATION, 0, NULL);
@@ -59,12 +57,11 @@ bool send_grecpnotify_tunnelverify() {
         res = false;
     }
 
-    free(buffer);
     return res;
 }
 
 bool send_grecpnotify_linkfailure(uint8_t tuntype) {
-    void *buffer = calloc(1, MAX_PKT_SIZE);
+    unsigned char buffer[MAX_PKT_SIZE];
     int size = 0;
 
     /* we can only signal the failure of the other tunnel, not our own */
@@ -93,12 +90,11 @@ bool send_grecpnotify_linkfailure(uint8_t tuntype) {
         res = false;
     }
 
-    free(buffer);
     return res;
 }
 
 bool send_grecpnotify_bypasstraffic(uint32_t kbit) {
-    void *buffer = calloc(1, MAX_PKT_SIZE);
+    unsigned char buffer[MAX_PKT_SIZE];
     int size = 0;
 
     uint32_t bypasstraffic = htonl(kbit);
@@ -116,7 +112,6 @@ bool send_grecpnotify_bypasstraffic(uint32_t kbit) {
         res = false;
     }
 
-    free(buffer);
     return res;
 }
 

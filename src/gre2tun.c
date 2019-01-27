@@ -28,7 +28,7 @@ void *gre2tun_main() {
     sprintf(threadname, "%s-recv", trimifname);
     pthread_setname_np(pthread_self(), threadname);
 
-    static unsigned char buffer[MAX_PKT_SIZE];
+    unsigned char buffer[MAX_PKT_SIZE];
     uint16_t size;
     uint32_t sequence;
     uint8_t payload_offset;

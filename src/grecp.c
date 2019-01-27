@@ -93,7 +93,7 @@ void process_grecpmessage(void *buffer, int size) {
 }
 
 bool send_grecpmessage(uint8_t msgtype, uint8_t tuntype, void *attributes, int attributes_size) {
-    void *buffer = calloc(1, MAX_PKT_SIZE);
+    unsigned char buffer[MAX_PKT_SIZE] = {};
     int size = 0;
 
     /* GRE header */
@@ -113,35 +113,34 @@ bool send_grecpmessage(uint8_t msgtype, uint8_t tuntype, void *attributes, int a
     size += attributes_size;
 
     /* Source & Destination */
-    struct sockaddr_in6 src;
+    struct sockaddr_in6 src = {};
     src.sin6_family = AF_INET6;
     if (tuntype == GRECP_TUNTYPE_LTE) {
         src.sin6_addr = runtime.lte.interface_ip;
     } else {
         src.sin6_addr = runtime.dsl.interface_ip;
     }
-    struct sockaddr_in6 *dst = calloc(1, sizeof(struct sockaddr_in6));
-    dst->sin6_family = AF_INET6;
-    dst->sin6_addr = runtime.haap.ip;
+    struct sockaddr_in6 dst = {};
+    dst.sin6_family = AF_INET6;
+    dst.sin6_addr = runtime.haap.ip;
 
     /* Construct control information */
-    struct msghdr msgh;
-    struct iovec msgiov;
+    struct msghdr msgh = {};
+    struct iovec msgiov = {};
     struct cmsghdr *c;
     struct unp_in_pktinfo {
         struct in6_addr ipi6_addr;
         int ipi6_ifindex;
     } *pi;
-    msgh.msg_name = dst;
+    msgh.msg_name = &dst;
     msgh.msg_namelen = sizeof(struct sockaddr_in6);
     msgiov.iov_base = buffer;
     msgiov.iov_len = size;
     msgh.msg_iov = &msgiov;
     msgh.msg_iovlen = 1;
-    msgh.msg_flags = 0;
-    void *control_buf = calloc(1, CMSG_LEN(sizeof(struct unp_in_pktinfo)) + 5);  /* what do we need those 5 extra bytes for? alignment? */
-    msgh.msg_control = control_buf;
-    msgh.msg_controllen = CMSG_LEN(sizeof(struct unp_in_pktinfo)) + 5;
+    unsigned char control_buf[CMSG_LEN(sizeof(struct unp_in_pktinfo))] = {};
+    msgh.msg_control = &control_buf;
+    msgh.msg_controllen = CMSG_LEN(sizeof(struct unp_in_pktinfo));
     c = CMSG_FIRSTHDR(&msgh);
     c->cmsg_level = IPPROTO_IPV6;
     c->cmsg_type = IPV6_PKTINFO;
@@ -164,10 +163,6 @@ bool send_grecpmessage(uint8_t msgtype, uint8_t tuntype, void *attributes, int a
     }
 
     /* TODO: check if sending failed due to a link failure and call send_grecpnotify_linkfailure if it did */
-
-    free(control_buf);
-    free(dst);
-    free(buffer);
 
     return res;
 }

@@ -17,7 +17,7 @@
 #include "openhybrid.h"
 
 bool send_grecphello(uint8_t tuntype) {
-    void *buffer = calloc(1, MAX_PKT_SIZE);
+    unsigned char buffer[MAX_PKT_SIZE];
     int size = 0;
 
     struct {
@@ -52,7 +52,6 @@ bool send_grecphello(uint8_t tuntype) {
         res = false;
     }
 
-    free(buffer);
     return res;
 }
 

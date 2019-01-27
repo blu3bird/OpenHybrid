@@ -26,7 +26,7 @@
 #include <netinet/udp.h>
 
 void send_gre(uint8_t tuntype, uint16_t proto, uint32_t sequence, void *payload, uint16_t payload_size) {
-    static unsigned char buffer[MAX_PKT_SIZE];
+    unsigned char buffer[MAX_PKT_SIZE] = {};
     int size = 0;
 
     /* GRE header */
@@ -48,20 +48,20 @@ void send_gre(uint8_t tuntype, uint16_t proto, uint32_t sequence, void *payload,
     size += payload_size;
 
     /* Source & Destination */
-    struct sockaddr_in6 src;
+    struct sockaddr_in6 src = {};
     src.sin6_family = AF_INET6;
     if (tuntype == GRECP_TUNTYPE_LTE) {
         src.sin6_addr = runtime.lte.interface_ip;
     } else {
         src.sin6_addr = runtime.dsl.interface_ip;
     }
-    struct sockaddr_in6 dst;
+    struct sockaddr_in6 dst = {};
     dst.sin6_family = AF_INET6;
     dst.sin6_addr = runtime.haap.ip;
 
     /* Construct control information */
-    struct msghdr msgh;
-    struct iovec msgiov;
+    struct msghdr msgh = {};
+    struct iovec msgiov = {};
     struct cmsghdr *c;
     struct unp_in_pktinfo {
         struct in6_addr ipi6_addr;
@@ -73,10 +73,9 @@ void send_gre(uint8_t tuntype, uint16_t proto, uint32_t sequence, void *payload,
     msgiov.iov_len = size;
     msgh.msg_iov = &msgiov;
     msgh.msg_iovlen = 1;
-    msgh.msg_flags = 0;
-    unsigned char *control_buf[CMSG_LEN(sizeof(struct unp_in_pktinfo)) + 5];
+    unsigned char control_buf[CMSG_LEN(sizeof(struct unp_in_pktinfo))] = {};
     msgh.msg_control = &control_buf;
-    msgh.msg_controllen = CMSG_LEN(sizeof(struct unp_in_pktinfo)) + 5;
+    msgh.msg_controllen = CMSG_LEN(sizeof(struct unp_in_pktinfo));
     c = CMSG_FIRSTHDR(&msgh);
     c->cmsg_level = IPPROTO_IPV6;
     c->cmsg_type = IPV6_PKTINFO;
@@ -97,7 +96,7 @@ void *tun2gre_main() {
     sprintf(threadname, "%s-send", trimifname);
     pthread_setname_np(pthread_self(), threadname);
 
-    static unsigned char buffer[MAX_PKT_SIZE];
+    unsigned char buffer[MAX_PKT_SIZE];
     uint16_t size;
     uint16_t etherproto;
     uint32_t sequence = 1;

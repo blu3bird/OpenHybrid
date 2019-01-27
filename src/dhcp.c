@@ -124,8 +124,8 @@ pid_t start_udhcpc6() {
 }
 
 void process_udhcpc_output() {
-    void *buffer = calloc(1, MAX_UDHCPC_OUTPUT);
-    if (read(udhcpc_pipe[0], buffer, MAX_UDHCPC_OUTPUT))  {
+    char buffer[MAX_UDHCPC_OUTPUT] = {};
+    if (read(udhcpc_pipe[0], buffer, MAX_UDHCPC_OUTPUT-1))  {
         char *line = strtok(buffer, "\n");
         while (line != NULL) {
             if (strncmp(line, "ip=", 3) == 0)
@@ -151,12 +151,11 @@ void process_udhcpc_output() {
         logger(LOG_ERROR, "Failed to read udhcpc output: %s\n", strerror(errno));
     }
     close(udhcpc_pipe[0]);
-    free(buffer);
 }
 
 void process_udhcpc6_output() {
-    void *buffer = calloc(1, MAX_UDHCPC_OUTPUT);
-    if (read(udhcpc6_pipe[0], buffer, MAX_UDHCPC_OUTPUT))  {
+    char buffer[MAX_UDHCPC_OUTPUT] = {};
+    if (read(udhcpc6_pipe[0], buffer, MAX_UDHCPC_OUTPUT-1))  {
         char *line = strtok(buffer, "\n");
         while (line != NULL) {
             if (strncmp(line, "prefix_address=", 15) == 0)
@@ -184,7 +183,6 @@ void process_udhcpc6_output() {
         logger(LOG_ERROR, "Failed to read udhcpc6 output: %s\n", strerror(errno));
     }
     close(udhcpc6_pipe[0]);
-    free(buffer);
 }
 
 bool kill_udhcpc() {
