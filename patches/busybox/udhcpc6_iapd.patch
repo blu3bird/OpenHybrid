@@ -1,0 +1,15 @@
+Include advertised prefix in request (RFC4633).
+
+--- a/networking/udhcp/d6_dhcpc.c
++++ b/networking/udhcp/d6_dhcpc.c
+@@ -1382,6 +1382,10 @@ int udhcpc6_main(int argc UNUSED_PARAM, char **argv)
+ 				continue;
+ 			case REQUESTING:
+ 				if (!discover_retries || packet_num < discover_retries) {
++					if (option_mask32 & OPT_d) {
++						free(client6_data.ia_pd);
++						client6_data.ia_pd = d6_copy_option(packet.d6_options, packet_end, D6_OPT_IA_PD);
++					}
+ 					/* send multicast select packet */
+ 					send_d6_select(xid);
+ 					timeout = discover_timeout;

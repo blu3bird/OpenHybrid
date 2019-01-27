@@ -1,0 +1,22 @@
+Use 10:00:00:00:00:00 as mac for devices that don't have a mac address.
+
+--- /networking/udhcp/socket.c
++++ b/networking/udhcp/socket.c
+@@ -65,7 +65,16 @@ int FAST_FUNC udhcp_read_interface(const char *interface, int *ifindex, uint32_t
+ 			close(fd);
+ 			return -1;
+ 		}
+-		memcpy(mac, ifr->ifr_hwaddr.sa_data, 6);
++		if (memcmp(ifr->ifr_hwaddr.sa_data, "\0\0\0\0\0\0", 6) == 0) {
++			mac[0] = 0x10;
++			mac[1] = 0x00;
++			mac[2] = 0x00;
++			mac[3] = 0x00;
++			mac[4] = 0x00;
++			mac[5] = 0x00;
++		} else {
++			memcpy(mac, ifr->ifr_hwaddr.sa_data, 6);
++		}
+ 		log2("MAC %02x:%02x:%02x:%02x:%02x:%02x",
+ 			mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+ 	}
