@@ -38,15 +38,15 @@ For uploads you can implement a similar logic, or route your outgoing traffic st
 * Linux (kernel 3.7 or newer)
 * busybox (sh, udhcpc and udhcpc6 applets)
 * libmnl
+* A reasonable C library (eg. glibc)
 
 And for compilation:
 * GNU make
 * A reasonable C compiler
 
-#### udhcpc6 prefix delegation bug
+#### Patches for Linux and busybox
 
-The current (1.29.3) version of busybox' udhcpc6 does not support prefix delegation. You need to patch it using `busybox/udhcpc6_iapd.patch`. Without this patch IPv6 will not work and you are stuck with IPv4 only.
-
+The current versions of Linux (>=4.20) and busybox (all versions) need to be patched in order for OpenHybrid to work. See `patches` for details.
 
 ## Usage
 
