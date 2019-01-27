@@ -78,7 +78,7 @@ void *gre2tun_main() {
             } else {
                 payload_offset = 8;
             }
-q
+
             if (payload_offset == 8) {
                 /* no sequence? skip reorder buffer and flush directly */
                 memset(buffer + payload_offset - 4, 0, 2); /* tun pi flags */
