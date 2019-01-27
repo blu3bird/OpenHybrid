@@ -19,6 +19,7 @@
 /* Proto and flags are static */
 #define GRECP_PROTO 0x0101 /* RFC says 0xbfea */
 #define GRECP_FLAGSANDVERSION 0x2000 /* Key bit set, all other bits unset */
+#define GRECP_FLAGSANDVERSION_WITH_SEQ 0x3000 /* Key bit set, sequence bit set, all other bits unset */
 
 /* Message types */
 #define GRECP_MSGTYPE_REQUEST 1

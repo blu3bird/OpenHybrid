@@ -80,7 +80,6 @@ pid_t start_udhcpc() {
             "-n",
             "-q",
             "-f",
-            "-C",
             (runtime.log_level >= LOG_CRAZYDEBUG) ? "-v" : NULL,
             NULL);
         exit(EXIT_FAILURE);

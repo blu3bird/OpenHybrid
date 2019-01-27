@@ -19,7 +19,7 @@
 #include <signal.h>
 #include <linux/filter.h>
 
-void open_socket() {
+void open_grecp_socket() {
     sockfd = socket(AF_INET6, SOCK_RAW, IPPROTO_GRE);
     if (sockfd < 0) {
         logger(LOG_FATAL, "Creation of raw socket failed: %s\n", strerror(errno));
@@ -47,11 +47,16 @@ void open_socket() {
     }
 }
 
-int close_socket() {
+int close_grecp_socket() {
     return close(sockfd);
 }
 
 void execute_timers() {
+    /* update interface ips */
+    runtime.lte.interface_ip = get_primary_ip6(runtime.lte.interface_name);
+    if (runtime.bonding)
+        runtime.dsl.interface_ip = get_primary_ip6(runtime.dsl.interface_name);
+
     /* connect, if not connected */
     if (!runtime.lte.tunnel_established) {
         send_grecprequest(GRECP_TUNTYPE_LTE);
@@ -98,7 +103,7 @@ void execute_timers() {
 
     /* bypass bandwidth */
     if ((runtime.dsl.tunnel_established) && (runtime.dsl.last_bypass_traffic_sent < get_uptime().tv_sec - runtime.haap.bypass_bandwidth_check_interval)) {
-        send_grecpnotify_bypasstraffic(10000); /* FIXME: calculate on demand */
+        send_grecpnotify_bypasstraffic(1000); /* FIXME: calculate on demand */
     }
 
     /* reset stats in case of tear down, hello failure and such */
@@ -151,6 +156,28 @@ void execute_timers() {
         runtime.tunnel_interface_created = !destroy_tunnel_dev();
     }
 
+    /* start sender/receiver threads */
+    if ((runtime.bonding) && (runtime.tunnel_interface_created)) {
+        if (!sockfd_gre)
+            open_gre_socket();
+        if (!runtime.gre2tun_thread) {
+            pthread_create(&runtime.gre2tun_thread, NULL, &gre2tun_main, NULL);
+            //pthread_detach(runtime.gre2tun_thread);
+        }
+        if (!runtime.tun2gre_thread) {
+            pthread_create(&runtime.tun2gre_thread, NULL, &tun2gre_main, NULL);
+            //pthread_detach(runtime.tun2gre_thread);
+        }
+    }
+    if ((runtime.bonding) && (!runtime.tunnel_interface_created)) {
+        if (runtime.gre2tun_thread)
+            pthread_cancel(runtime.gre2tun_thread);
+        if (runtime.tun2gre_thread)
+            pthread_cancel(runtime.tun2gre_thread);
+        if (sockfd_gre)
+            close_gre_socket();
+    }
+
     /* DHCP */
     if ((runtime.tunnel_interface_created) && (!runtime.dhcp.lease_time) && (!runtime.dhcp.udhcpc_pid))
         runtime.dhcp.udhcpc_pid = start_udhcpc();
@@ -159,13 +186,13 @@ void execute_timers() {
         waitpid(runtime.dhcp.udhcpc_pid, &status, WNOHANG);
         if (WIFEXITED(status)) {
             runtime.dhcp.udhcpc_pid = 0;
+            process_udhcpc_output();
             if (WEXITSTATUS(status) != 0) {
                 logger(LOG_ERROR, "udhcpc exited with code '%i'.\n", WEXITSTATUS(status));
-            } else {
-                process_udhcpc_output();
             }
         }
     }
+
     /* DHCP6 */
     if ((runtime.tunnel_interface_created) && (!runtime.dhcp6.lease_time) && (!runtime.dhcp6.udhcpc6_pid))
         runtime.dhcp6.udhcpc6_pid = start_udhcpc6();
@@ -174,10 +201,9 @@ void execute_timers() {
         waitpid(runtime.dhcp6.udhcpc6_pid, &status, WNOHANG);
         if (WIFEXITED(status)) {
             runtime.dhcp6.udhcpc6_pid = 0;
+            process_udhcpc6_output();
             if (WEXITSTATUS(status) != 0) {
                 logger(LOG_ERROR, "udhcpc6 exited with code '%i'.\n", WEXITSTATUS(status));
-            } else {
-                process_udhcpc6_output();
             }
         }
     }
@@ -217,6 +243,16 @@ void execute_timers() {
                 if (runtime.dhcp6.lease_time)
                     trigger_event("dhcpdown_ip6");
 
+                /* stop threads */
+                if (runtime.bonding) {
+                    if (runtime.gre2tun_thread)
+                        pthread_cancel(runtime.gre2tun_thread);
+                    if (runtime.tun2gre_thread)
+                        pthread_cancel(runtime.tun2gre_thread);
+                    if (sockfd_gre)
+                        close_gre_socket();
+                }
+
                 /* remove interfaces */
                 if (runtime.tunnel_interface_created)
                     destroy_tunnel_dev();
@@ -228,7 +264,7 @@ void execute_timers() {
                 } else if ((runtime.lte.tunnel_established) || (runtime.dsl.tunnel_established))
                     logger(LOG_WARNING, "Due to a limitation of RFC8157 the tunnel session will remain active on the server and you will not be able to reconnect until it times out (max 120 seconds).\n");
 
-                close_socket();
+                close_grecp_socket();
                 delete_dhcp_script();
                 logger(LOG_INFO, "OpenHybrid stopped.\n");
                 trigger_event("shutdown");
@@ -257,12 +293,12 @@ int main(int argc, char **argv, char **envp) {
         return(EXIT_FAILURE);
     }
     read_config(argv[1]);
-   
+
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
 
     create_dhcp_script();
-    open_socket();
+    open_grecp_socket();
     logger(LOG_INFO, "OpenHybrid started.\n");
     trigger_event("startup");
     while (true) {

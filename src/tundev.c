@@ -24,7 +24,7 @@
 #include <linux/if_tun.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-
+#include <net/ethernet.h>
 
 bool create_gre_tunnel_dev() {
     struct mnl_socket *nl_sock = NULL;
@@ -52,7 +52,7 @@ bool create_gre_tunnel_dev() {
 
     struct nlattr *tunnelinfo = mnl_attr_nest_start(nlh, IFLA_INFO_DATA);
     struct sockaddr_in6 addr = {};
-    addr.sin6_addr = get_primary_ip6(runtime.lte.interface_name);
+    addr.sin6_addr = runtime.lte.interface_ip;
     mnl_attr_put(nlh, IFLA_GRE_LOCAL, sizeof(addr.sin6_addr), &addr.sin6_addr);
     mnl_attr_put(nlh, IFLA_GRE_REMOTE, sizeof(runtime.haap.ip), &runtime.haap.ip);
     mnl_attr_put_u32(nlh, IFLA_GRE_FLAGS, IP6_TNL_F_IGN_ENCAP_LIMIT);
@@ -118,8 +118,7 @@ bool destroy_gre_tunnel_dev() {
 }
 
 bool create_tun_tunnel_dev() {
-    int fd;
-    if ((fd = open("/dev/net/tun", O_RDWR)) < 0 ) {
+    if ((sockfd_tun = open("/dev/net/tun", O_RDWR)) < 0 ) {
         logger(LOG_ERROR, "Opening /dev/net/tun failed: %s\n", strerror(errno));
         return false;
     }
@@ -130,15 +129,9 @@ bool create_tun_tunnel_dev() {
 
     strncpy(ifr.ifr_name, runtime.tunnel_interface_name, strlen(runtime.tunnel_interface_name));
 
-    if (ioctl(fd, TUNSETIFF, (void *)&ifr) < 0 ) {
+    if (ioctl(sockfd_tun, TUNSETIFF, (void *)&ifr) < 0 ) {
         logger(LOG_ERROR, "Creation of Tunnel interface '%s' failed: %s\n", runtime.tunnel_interface_name, strerror(errno));
-        close(fd);
-        return false;
-    }
-
-    if (ioctl(fd, TUNSETPERSIST, true) < 0 ) {
-        logger(LOG_ERROR, "Creation of Tunnel interface '%s' failed: %s\n", runtime.tunnel_interface_name, strerror(errno));
-        close(fd);
+        close(sockfd_tun);
         return false;
     }
 
@@ -158,7 +151,8 @@ bool create_tun_tunnel_dev() {
     }
 
     close(gen_fd);
-    close(fd);
+
+    /* TODO: increase send buffer, maybe? */
 
     logger(LOG_INFO, "Tunnel interface '%s' created.\n", runtime.tunnel_interface_name);
     trigger_event("tunnelup");
@@ -166,31 +160,7 @@ bool create_tun_tunnel_dev() {
 }
 
 bool destroy_tun_tunnel_dev() {
-    int fd;
-    if ((fd = open("/dev/net/tun", O_RDWR)) < 0 ) {
-        logger(LOG_ERROR, "Opening /dev/net/tun failed: %s\n", strerror(errno));
-        return true;
-    }
-
-    struct ifreq ifr;
-    memset(&ifr, 0, sizeof(ifr));
-    ifr.ifr_flags = IFF_TUN;
-
-    strncpy(ifr.ifr_name, runtime.tunnel_interface_name, strlen(runtime.tunnel_interface_name));
-
-    if (ioctl(fd, TUNSETIFF, (void *)&ifr) < 0 ) {
-        logger(LOG_ERROR, "Destruction of Tunnel interface '%s' failed: %s\n", runtime.tunnel_interface_name, strerror(errno));
-        close(fd);
-        return false;
-    }
-
-    if (ioctl(fd, TUNSETPERSIST, false) < 0 ) {
-        logger(LOG_ERROR, "Destruction of Tunnel interface '%s' failed: %s\n", runtime.tunnel_interface_name, strerror(errno));
-        close(fd);
-        return true;
-    }
-
-    close(fd);
+    close(sockfd_tun);
 
     logger(LOG_INFO, "Tunnel interface '%s' destroyed.\n", runtime.tunnel_interface_name);
     trigger_event("tunneldown");
@@ -209,4 +179,35 @@ bool destroy_tunnel_dev() {
         return destroy_tun_tunnel_dev();
     else
         return destroy_gre_tunnel_dev();
+}
+
+void open_gre_socket() {
+    sockfd_gre = socket(AF_INET6, SOCK_RAW, IPPROTO_GRE);
+    if (sockfd_gre < 0) {
+        logger(LOG_FATAL, "Creation of raw socket failed: %s\n", strerror(errno));
+    }
+
+    /* BPF filter to only get ipv4/6 data messages for our tunnel */
+    struct sock_filter bpfcode[] = {
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, 4), /* load gre->key */
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, runtime.haap.bonding_key, 0, 4), /* skip next 4 lines if it's != runtime.haap.bonding_key */
+        BPF_STMT(BPF_LD | BPF_H | BPF_ABS, 2), /* load gre->proto */
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, ETHERTYPE_IP, 1, 0), /* skip next line if it's == ETHERTYPE_IP  */
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, ETHERTYPE_IPV6, 0, 1), /* skip next line if it's != ETHERTYPE_IPV6  */
+        BPF_STMT(BPF_RET | BPF_K, -1), /* accept packet */
+        BPF_STMT(BPF_RET | BPF_K, 0), /* discard packet */
+    };
+    struct sock_fprog bpfprog = {
+        .len = 7,
+        .filter = bpfcode,
+    };
+    if (setsockopt(sockfd_gre, SOL_SOCKET, SO_ATTACH_FILTER, &bpfprog, sizeof(bpfprog)) < 0) {
+        logger(LOG_ERROR, "Attaching BPF failed: %s\n", strerror(errno));
+    }
+
+    /* TODO: increase recv buffer, maybe? */
+}
+
+void close_gre_socket() {
+    close(sockfd_gre);
 }

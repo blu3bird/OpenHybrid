@@ -21,7 +21,6 @@ void read_config(char *path) {
     runtime.log_level = LOG_INFO;
     memcpy(&runtime.lte.interface_name, "wwan0", 5);
     memcpy(&runtime.dsl.interface_name, "ppp0", 4);
-    memcpy(&runtime.tunnel_interface_name, "tun0", 4);
 
     FILE *fp = fopen(path, "r");
     if (!fp) {
@@ -112,6 +111,13 @@ void read_config(char *path) {
     /* Defaults part 2 */
     if (memcmp(&runtime.haap.anycast_ip, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16) == 0) {
         inet_pton(AF_INET6, "2003:6::1", &runtime.haap.anycast_ip);
+    }
+    if (strlen(runtime.tunnel_interface_name) == 0) {
+        if (runtime.bonding)
+            memcpy(&runtime.tunnel_interface_name, "tun0", 4);
+        else
+        memcpy(&runtime.tunnel_interface_name, "gre1", 4);
+
     }
     runtime.haap.ip = runtime.haap.anycast_ip;
     if (!runtime.tunnel_interface_mtu) {

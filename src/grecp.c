@@ -116,9 +116,9 @@ bool send_grecpmessage(uint8_t msgtype, uint8_t tuntype, void *attributes, int a
     struct sockaddr_in6 src;
     src.sin6_family = AF_INET6;
     if (tuntype == GRECP_TUNTYPE_LTE) {
-        src.sin6_addr = get_primary_ip6(runtime.lte.interface_name);
+        src.sin6_addr = runtime.lte.interface_ip;
     } else {
-        src.sin6_addr = get_primary_ip6(runtime.dsl.interface_name);
+        src.sin6_addr = runtime.dsl.interface_ip;
     }
     struct sockaddr_in6 *dst = calloc(1, sizeof(struct sockaddr_in6));
     dst->sin6_family = AF_INET6;

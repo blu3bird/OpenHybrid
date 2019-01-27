@@ -22,7 +22,7 @@ CFLAGS += -std=gnu11
 # Libraries
 CFLAGS += $(shell pkg-config --cflags libmnl)
 LDFLAGS += $(shell pkg-config --libs-only-other --libs-only-L libmnl)
-LIBS += $(shell pkg-config --libs-only-l libmnl)
+LIBS += $(shell pkg-config --libs-only-l libmnl) -lpthread
 
 EXEC = openhybrid
 SOURCES = $(wildcard *.c)

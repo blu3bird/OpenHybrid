@@ -30,6 +30,7 @@
 #endif
 #include <time.h>
 #include <net/if.h>
+#include <pthread.h>
 
 /* Custom includes */
 #include "grecp.h"
@@ -45,6 +46,8 @@
 #include "logging.h"
 #include "dhcp.h"
 #include "event.h"
+#include "tun2gre.h"
+#include "gre2tun.h"
 
 /* GRECP already supports fragmentation of large message, we shouldn't need IP fragmentation */
 #define MAX_PKT_SIZE 1500
@@ -72,6 +75,8 @@ struct {
     uint16_t tunnel_interface_mtu;
     bool tunnel_interface_created;
     char tunnel_interface_name[IF_NAMESIZE + 1];
+    pthread_t gre2tun_thread;
+    pthread_t tun2gre_thread;
     volatile int signal;
     char event_script_path[128];
     struct {
@@ -94,6 +99,7 @@ struct {
         time_t last_hello_received;
         uint8_t missed_hellos;
         bool tunnel_verification_required;
+        struct in6_addr interface_ip;
     } lte;
     struct {
         char interface_name[IF_NAMESIZE + 1];
@@ -102,9 +108,11 @@ struct {
         time_t last_hello_received;
         uint8_t missed_hellos;
         time_t last_bypass_traffic_sent;
+        struct in6_addr interface_ip;
     } dsl;
 } runtime;
 
 /* Raw socket */
 int sockfd;
-int sockdhcpfd;
+int sockfd_gre;
+int sockfd_tun;

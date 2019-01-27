@@ -16,3 +16,5 @@
  */
 bool create_tunnel_dev();
 bool destroy_tunnel_dev();
+void open_gre_socket();
+void close_gre_socket();
