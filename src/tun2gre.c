@@ -25,7 +25,7 @@
 #include <netinet/ip6.h>
 #include <netinet/udp.h>
 
-void send_gre(uint8_t tuntype, uint16_t proto, uint32_t sequence, void *payload, uint16_t payload_size) {
+void send_gre(uint8_t tuntype, uint16_t proto, uint32_t sequence, bool include_sequence, void *payload, uint16_t payload_size) {
     unsigned char buffer[MAX_PKT_SIZE] = {};
     int size = 0;
 
@@ -36,7 +36,7 @@ void send_gre(uint8_t tuntype, uint16_t proto, uint32_t sequence, void *payload,
     greh->key = htonl(runtime.haap.bonding_key);
     size += sizeof(struct grehdr);
     /* Sequence */
-    if (sequence) {
+    if (include_sequence) {
         greh->flags_and_version = htons(GRECP_FLAGSANDVERSION_WITH_SEQ);
         sequence = htonl(sequence);
         memcpy(buffer + size, &sequence, sizeof(sequence));
@@ -97,17 +97,15 @@ void *tun2gre_main() {
     pthread_setname_np(pthread_self(), threadname);
 
     unsigned char buffer[MAX_PKT_SIZE];
-    uint16_t size;
+    ssize_t size;
     uint16_t etherproto;
-    uint32_t sequence = 1;
+    uint32_t sequence = 0;
     struct iphdr *iph;
     struct ip6_hdr *ip6h;
     struct udphdr *udph;
     bool is_dhcp;
     while (true) {
         is_dhcp = false;
-        if (!sequence)
-            sequence++;
 
         size = read(sockfd_tun, buffer, MAX_PKT_SIZE);
         if (size > 0) {
@@ -140,14 +138,14 @@ void *tun2gre_main() {
 
             if (is_dhcp) {
                 logger(LOG_CRAZYDEBUG, "tun2gre: Sending %u bytes via LTE (forced)\n", size);
-                send_gre(GRECP_TUNTYPE_LTE, etherproto, 0, buffer + 4, size - 4);
+                send_gre(GRECP_TUNTYPE_LTE, etherproto, 0, false, buffer + 4, size - 4);
             } else if (runtime.dsl.tunnel_established) {
                 /* TODO: implement overflow to LTE */
                 logger(LOG_CRAZYDEBUG, "tun2gre: Sending %u bytes via DSL\n", size);
-                send_gre(GRECP_TUNTYPE_DSL, etherproto, sequence++, buffer + 4, size - 4);
+                send_gre(GRECP_TUNTYPE_DSL, etherproto, sequence++, true, buffer + 4, size - 4);
             } else if (runtime.lte.tunnel_established) {
                 logger(LOG_CRAZYDEBUG, "tun2gre: Sending %u bytes via LTE\n", size);
-                send_gre(GRECP_TUNTYPE_LTE, etherproto, sequence++, buffer + 4, size - 4);
+                send_gre(GRECP_TUNTYPE_LTE, etherproto, sequence++, true, buffer + 4, size - 4);
             } else {
                 logger(LOG_ERROR, "Sending packet faiked: All tunnels are down");
             }

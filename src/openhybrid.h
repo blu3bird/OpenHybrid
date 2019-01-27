@@ -102,6 +102,7 @@ struct {
         uint8_t missed_hellos;
         bool tunnel_verification_required;
         struct in6_addr interface_ip;
+        struct timeval round_trip_time;
     } lte;
     struct {
         char interface_name[IF_NAMESIZE];
@@ -111,6 +112,7 @@ struct {
         uint8_t missed_hellos;
         time_t last_bypass_traffic_sent;
         struct in6_addr interface_ip;
+        struct timeval round_trip_time;
     } dsl;
 } runtime;
 

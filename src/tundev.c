@@ -187,6 +187,12 @@ void open_gre_socket() {
         logger(LOG_FATAL, "Creation of raw socket failed: %s\n", strerror(errno));
     }
 
+    /* Set timeout for blocking reads */
+    struct timeval read_timeout = { .tv_sec = 0, .tv_usec = 100000 };
+    if (setsockopt(sockfd_gre, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof(read_timeout)) < 0) {
+        logger(LOG_FATAL, "Configuration of raw socket failed: %s\n", strerror(errno));
+    }
+
     /* BPF filter to only get ipv4/6 data messages for our tunnel */
     struct sock_filter bpfcode[] = {
         BPF_STMT(BPF_LD | BPF_W | BPF_ABS, 4), /* load gre->key */

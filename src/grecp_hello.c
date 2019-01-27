@@ -80,17 +80,17 @@ void handle_grecphello(uint8_t tuntype, void *buffer, int size) {
 
                 struct timeval now = get_uptime();
                 struct timeval sent = { .tv_sec = timestamp.seconds, .tv_usec = timestamp.milliseconds * 1000 };
-                struct timeval rtt = {};
-                timersub(&now, &sent, &rtt);
 
                 if (tuntype == GRECP_TUNTYPE_LTE ) {
+                    timersub(&now, &sent, &runtime.lte.round_trip_time);
                     runtime.lte.last_hello_received = timestamp.seconds;
                     runtime.lte.missed_hellos = 0;
-                    logger(LOG_DEBUG, "Round trip time for LTE: %u.%03us\n", rtt.tv_sec, rtt.tv_usec / 1000);
+                    logger(LOG_DEBUG, "Round trip time for LTE: %u.%03us\n", runtime.lte.round_trip_time.tv_sec, runtime.lte.round_trip_time.tv_usec / 1000);
                 } else {
+                    timersub(&now, &sent, &runtime.dsl.round_trip_time);
                     runtime.dsl.last_hello_received = timestamp.seconds;
                     runtime.dsl.missed_hellos = 0;
-                    logger(LOG_DEBUG, "Round trip time for DSL: %u.%03us\n", rtt.tv_sec, rtt.tv_usec / 1000);
+                    logger(LOG_DEBUG, "Round trip time for DSL: %u.%03us\n", runtime.dsl.round_trip_time.tv_sec, runtime.dsl.round_trip_time.tv_usec / 1000);
                 }
 
             case GRECP_MSGATTR_PADDING:
