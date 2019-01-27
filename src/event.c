@@ -17,8 +17,8 @@
 #include "openhybrid.h"
 #include <sys/wait.h>
 
-#define MAX_ENV_VARS 64
-#define MAX_ENV_VAR_LENGTH 128
+#define MAX_ENV_VARS 16
+#define MAX_ENV_VAR_LENGTH 64
 
 void trigger_event(char *name) {
     if (strlen(runtime.event_script_path) == 0)
@@ -33,10 +33,15 @@ void trigger_event(char *name) {
             logger(LOG_ERROR, "Triggering event '%s' failed: %s\n", name, strerror(errno));
             exit(1);
         } else if (pid == 0) {
-            char env[MAX_ENV_VARS][MAX_ENV_VAR_LENGTH] = {};
+            char *env[MAX_ENV_VARS];
             char straddr[INET_ADDRSTRLEN] = {};
             char straddr6[INET6_ADDRSTRLEN] = {};
-            int i = 0;
+            int i;
+
+            for (i=0; i < MAX_ENV_VARS; i++) {
+                env[i] = calloc(1, MAX_ENV_VAR_LENGTH);
+            }
+            i = 0;
 
             /* Interfaces */
             sprintf(env[i++], "lte_interface_name=%s", runtime.lte.interface_name);
@@ -59,6 +64,7 @@ void trigger_event(char *name) {
             sprintf(env[i++], "dhcp6_prefix_length=%u", runtime.dhcp6.prefix_length);
             sprintf(env[i++], "dhcp6_lease_time=%u", runtime.dhcp6.lease_time);
 
+            env[i++] = NULL;
             execle(runtime.event_script_path, runtime.event_script_path, name, NULL, env);
             exit(EXIT_FAILURE);
         } else {
