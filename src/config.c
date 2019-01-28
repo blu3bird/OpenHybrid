@@ -84,7 +84,7 @@ void read_config(char *path) {
                 } else {
                     logger(LOG_WARNING, "Invalid log level '%s', falling back to 'warning'.\n", value);
                 }
-            } else if (strncmp(line, "gre interface mtu =", 19) == 0) {
+            } else if (strncmp(line, "tunnel interface mtu =", 19) == 0) {
                 if (atoi(value) < 1280) { /* IPV6_MIN_MTU */
                     logger(LOG_FATAL, "Minimum size for 'gre interface mtu' config is 1280.\n");
                 } else if (atoi(value) > 1448) {
