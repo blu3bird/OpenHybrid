@@ -51,12 +51,10 @@ void *gre2tun_main() {
     socklen_t saddr_size = sizeof(saddr);
 
     bool flushed_something;
-    bool needs_flush;
     uint16_t reorder_buffer_freeable;
 
     struct timeval now;
     struct timeval age;
-    struct timeval maxage;
 
     while (true) {
         size = recvfrom(sockfd_gre, buffer, MAX_PKT_SIZE, 0, (struct sockaddr *)&saddr, &saddr_size);
@@ -82,8 +80,8 @@ void *gre2tun_main() {
                 payload_offset = 8;
             }
 
-            if (payload_offset == 8) {
-                /* no sequence? skip reorder buffer and flush directly */
+            if ((payload_offset == 8) || ((runtime.reorder_buffer_timeout.tv_sec == 0) && (runtime.reorder_buffer_timeout.tv_usec == 0))) {
+                /* no sequence or reordering diabled? flush directly */
                 memset(buffer + payload_offset - 4, 0, 2); /* tun pi flags */
                 memcpy(buffer + payload_offset - 2, buffer + 2, 2); /* tun pi proto */
                 if (write(sockfd_tun, buffer + payload_offset - 4, size - payload_offset + 4) != size - payload_offset + 4) {
@@ -103,55 +101,45 @@ void *gre2tun_main() {
             }
         }
 
-        /* calculate the max time we wait for a packet based on the rtt difference of both links */
-        if (timercmp(&runtime.dsl.round_trip_time, &runtime.lte.round_trip_time, <)) {
-            timersub(&runtime.lte.round_trip_time, &runtime.dsl.round_trip_time, &maxage);
-        } else {
-            timersub(&runtime.dsl.round_trip_time, &runtime.lte.round_trip_time, &maxage);
-        }
-        /* cap at 100 ms */
-        if ((maxage.tv_sec > 0) || (maxage.tv_usec > 100000)) {
-            maxage.tv_sec = 0;
-            maxage.tv_usec = 100000;
-        }
-        logger(LOG_CRAZYDEBUG, "Max reorder buffer: %u.%06us\n", maxage.tv_sec, maxage.tv_usec);
         now = get_uptime();
 
-        /* flush reorder buffer, if possible */
+        /* flush reorder buffer, in-order */
+        restartflushing:
         flushed_something = true;
         while (flushed_something) {
             flushed_something = false;
             for (int i=0; i<reorder_buffer.size; i++) {
-                needs_flush = false;
-                if (reorder_buffer.packets[i].size > 0) {
-                    if ((reorder_buffer.packets[i].sequence) == sequence_flushed +1) {
-                        /* this one is next in order */
-                        logger(LOG_CRAZYDEBUG, "Reorder buffer: Flushed packet %u.\n", reorder_buffer.packets[i].sequence);
-                        needs_flush = true;
-                    } else if (reorder_buffer.packets[i].sequence <= sequence_flushed) {
-                        /* this one's already out of order...just flush it and hope for the best */
-                        logger(LOG_CRAZYDEBUG, "Reorder buffer: Flushed out-of-order packet %u.\n", reorder_buffer.packets[i].sequence);
-                        needs_flush = true;
-                    } else {
-                        timersub(&now, &reorder_buffer.packets[i].timestamp, &age);
-                        if (timercmp(&age, &maxage, >=)) {
-                            /* timeout reached */
-                            logger(LOG_CRAZYDEBUG, "Reorder buffer: Flushed timed-out packet %u.\n", reorder_buffer.packets[i].sequence);
-                            needs_flush = true;
-                        }
+                if (reorder_buffer.packets[i].sequence == sequence_flushed +1) {
+                    logger(LOG_CRAZYDEBUG, "Reorder buffer: Packet %u arrived in-order.\n", reorder_buffer.packets[i].sequence);
+                    if (write(sockfd_tun, reorder_buffer.packets[i].packet, reorder_buffer.packets[i].size) != reorder_buffer.packets[i].size) {
+                        logger(LOG_ERROR, "Tun device write failed: %s\n", strerror(errno));
                     }
-
-                    if (needs_flush) {
-                        if (write(sockfd_tun, reorder_buffer.packets[i].packet, reorder_buffer.packets[i].size) != reorder_buffer.packets[i].size) {
-                            logger(LOG_ERROR, "Tun device write failed: %s\n", strerror(errno));
-                        }
-                        free(reorder_buffer.packets[i].packet);
-                        reorder_buffer.packets[i].size = 0; /* mark as flushed */
-                        flushed_something = true;
-                        if (reorder_buffer.packets[i].sequence > sequence_flushed)
-                            sequence_flushed = reorder_buffer.packets[i].sequence;
-                    }
+                    free(reorder_buffer.packets[i].packet);
+                    flushed_something = true;
+                    sequence_flushed++;
+                    reorder_buffer.packets[i].size = 0; /* mark as flushed */
                 }
+            }
+        }
+
+        /* check for timed-out packets */
+        for (int i=0; i<reorder_buffer.size; i++) {
+            if (reorder_buffer.packets[i].size > 0) {
+                timersub(&now, &reorder_buffer.packets[i].timestamp, &age);
+                if (timercmp(&age, &runtime.reorder_buffer_timeout, >=)) {
+                    logger(LOG_DEBUG, "Reorder buffer: Packet %u timed out while waiting for packet %u to arrive.\n", reorder_buffer.packets[i].sequence, sequence_flushed + 1);
+                    sequence_flushed++;
+                    goto restartflushing;
+                }
+            }
+        }
+
+        /* and drop packets arriving after the deadline */
+        for (int i=0; i<reorder_buffer.size; i++) {
+            if ((reorder_buffer.packets[i].size > 0) && (reorder_buffer.packets[i].sequence <= sequence_flushed)) {
+                logger(LOG_DEBUG, "Reorder buffer: Packet %u arrived after deadline of %u.%03u seconds. Discarding.\n", reorder_buffer.packets[i].sequence, runtime.reorder_buffer_timeout.tv_sec, runtime.reorder_buffer_timeout.tv_usec / 1000);
+                free(reorder_buffer.packets[i].packet);
+                reorder_buffer.packets[i].size = 0; /* mark as flushed */
             }
         }
 

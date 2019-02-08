@@ -21,6 +21,7 @@ void read_config(char *path) {
     runtime.log_level = LOG_INFO;
     memcpy(&runtime.lte.interface_name, "wwan0", 5);
     memcpy(&runtime.dsl.interface_name, "ppp0", 4);
+    runtime.reorder_buffer_timeout.tv_usec = 100000;
 
     FILE *fp = fopen(path, "r");
     if (!fp) {
@@ -98,6 +99,9 @@ void read_config(char *path) {
             } else if (strncmp(line, "event script path =", 19) == 0) {
                 memset(&runtime.event_script_path, 0, sizeof(runtime.event_script_path));
                 memcpy(&runtime.event_script_path, value, strlen(value));
+            } else if (strncmp(line, "reorder buffer timeout =", 24) == 0) {
+                runtime.reorder_buffer_timeout.tv_sec = atoi(value) / 1000;
+                runtime.reorder_buffer_timeout.tv_usec = atoi(value) % 1000 * 1000;
             } else {
                 logger(LOG_WARNING, "Ignoring invalid line in config file: %s\n", line);
             }

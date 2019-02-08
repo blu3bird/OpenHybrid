@@ -81,6 +81,7 @@ struct {
     pthread_t tun2gre_thread;
     volatile int signal;
     char event_script_path[128];
+    struct timeval reorder_buffer_timeout;
     struct {
         pid_t udhcpc_pid;
         struct in_addr ip;
