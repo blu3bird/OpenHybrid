@@ -21,7 +21,7 @@ void read_config(char *path) {
     runtime.log_level = LOG_INFO;
     memcpy(&runtime.lte.interface_name, "wwan0", 5);
     memcpy(&runtime.dsl.interface_name, "ppp0", 4);
-    runtime.reorder_buffer_timeout.tv_usec = 100000;
+    runtime.reorder_buffer_timeout.tv_usec = 250 * 1000;
 
     FILE *fp = fopen(path, "r");
     if (!fp) {
