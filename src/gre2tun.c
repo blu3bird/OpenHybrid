@@ -43,7 +43,7 @@ void *gre2tun_main() {
     unsigned char buffer[MAX_PKT_SIZE];
     ssize_t size;
     uint32_t sequence;
-    uint32_t sequence_flushed = 0;
+    uint32_t sequence_flushed = UINT32_MAX;
 
     uint8_t payload_offset;
     struct grehdr *greh;
