@@ -58,8 +58,8 @@ case "${1}" in
         # assign it to the device
         ip -4 address replace ${dhcp_ip}/32 dev $tunnel_interface_name
 
-        # and add routes for heise.de and speed.hetzner.de, use ip's since we may not have a working DNS
-        for dst in 193.99.144.80 88.198.248.254
+        # and add routes for heise.de, speed.hetzner.de and speedtest-cdn.tmdev.t-motion.co.uk (used by speedtest.t-online.de), use ip's since we may not have a working DNS
+        for dst in 193.99.144.80 88.198.248.254 78.143.14.243
         do
             ip -4 route replace $dst dev $tunnel_interface_name
         done
