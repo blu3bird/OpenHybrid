@@ -111,43 +111,39 @@ void *tun2gre_main() {
         if (size > 0) {
             //logger_hexdump(LOG_DEBUG, buffer, size, "buffer:");
 
-            /* extract ether proto from tun packet info */
-            memcpy(&etherproto, buffer + 2, 2);
-            etherproto = ntohs(etherproto);
-
-            /* ignore unsupported protocols */
-            if ((etherproto != ETHERTYPE_IP) && (etherproto != ETHERTYPE_IPV6))
+            /* determine packet type */
+            iph = (struct iphdr *)buffer;
+            if (iph->version == 4) {
+                etherproto = ETHERTYPE_IP;
+            } else if (iph->version == 6) {
+                etherproto = ETHERTYPE_IPV6;
+                ip6h = (struct ip6_hdr *)buffer;
+            } else {
+                /* ignore unsupported protocols */
                 continue;
-
-            /* check if it's a dhcp packet */
-            if (etherproto == ETHERTYPE_IP) {
-                iph = (struct iphdr *)(buffer + 4);
-                if (iph->protocol == IPPROTO_UDP) {
-                    udph = (struct udphdr *)(buffer + 4 + sizeof(struct iphdr));
-                    if ((ntohs(udph->uh_sport) == 68) && (ntohs(udph->uh_dport) == 67))
-                        is_dhcp = true;
-                }
-            } else if (etherproto == ETHERTYPE_IPV6) {
-                ip6h = (struct ip6_hdr *)(buffer + 4);
-                if (ip6h->ip6_ctlun.ip6_un1.ip6_un1_nxt == IPPROTO_UDP) {
-                    udph = (struct udphdr *)(buffer + 4 + sizeof(struct ip6_hdr));
-                    if ((ntohs(udph->uh_sport) == 546) && (ntohs(udph->uh_dport) == 547))
-                        is_dhcp = true;
-                }
             }
 
-            if (is_dhcp) {
-                logger(LOG_CRAZYDEBUG, "tun2gre: Sending %u bytes via LTE (forced)\n", size);
-                send_gre(GRECP_TUNTYPE_LTE, etherproto, 0, false, buffer + 4, size - 4);
-            } else if (runtime.dsl.tunnel_established) {
+            /* check if it's a dhcp packet */
+            if ((etherproto == ETHERTYPE_IP) && (iph->protocol == IPPROTO_UDP)) {
+                    udph = (struct udphdr *)(buffer + sizeof(struct iphdr));
+                    if ((ntohs(udph->uh_sport) == 68) && (ntohs(udph->uh_dport) == 67))
+                        is_dhcp = true;
+            } else if ((etherproto == ETHERTYPE_IPV6) && (ip6h->ip6_ctlun.ip6_un1.ip6_un1_nxt == IPPROTO_UDP)) {
+                    udph = (struct udphdr *)(buffer + sizeof(struct ip6_hdr));
+                    if ((ntohs(udph->uh_sport) == 546) && (ntohs(udph->uh_dport) == 547))
+                        is_dhcp = true;
+            }
+            is_dhcp = true;
+
+            if ((!is_dhcp) && (runtime.dsl.tunnel_established)) {
                 /* TODO: implement overflow to LTE */
                 logger(LOG_CRAZYDEBUG, "tun2gre: Sending %u bytes via DSL\n", size);
-                send_gre(GRECP_TUNTYPE_DSL, etherproto, sequence++, true, buffer + 4, size - 4);
+                send_gre(GRECP_TUNTYPE_DSL, etherproto, sequence++, true, buffer, size);
             } else if (runtime.lte.tunnel_established) {
                 logger(LOG_CRAZYDEBUG, "tun2gre: Sending %u bytes via LTE\n", size);
-                send_gre(GRECP_TUNTYPE_LTE, etherproto, sequence++, true, buffer + 4, size - 4);
+                send_gre(GRECP_TUNTYPE_LTE, etherproto, sequence++, true, buffer, size);
             } else {
-                logger(LOG_ERROR, "Sending packet faiked: All tunnels are down");
+                logger(LOG_ERROR, "Sending packet failed: All tunnels are down");
             }
         } else {
             logger(LOG_ERROR, "Tun device read failed: %s\n", strerror(errno));

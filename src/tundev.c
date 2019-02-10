@@ -125,7 +125,7 @@ bool create_tun_tunnel_dev() {
 
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-    ifr.ifr_flags = IFF_TUN; // /* IFF_MULTI_QUEUE, maybe? */
+    ifr.ifr_flags = IFF_TUN | IFF_NO_PI | IFF_NOFILTER;
 
     strncpy(ifr.ifr_name, runtime.tunnel_interface_name, strlen(runtime.tunnel_interface_name));
 

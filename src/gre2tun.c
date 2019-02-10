@@ -73,18 +73,19 @@ void *gre2tun_main() {
             /* extract sequence number and payload offset */
             greh = (struct grehdr *)buffer;
             if (greh->flags_and_version == htons(GRECP_FLAGSANDVERSION_WITH_SEQ)) {
-                memcpy(&sequence, buffer + 8, 4);
+                memcpy(&sequence, buffer + sizeof(struct grehdr), sizeof(sequence));
                 sequence = ntohl(sequence);
                 payload_offset = 12;
-            } else {
+            } else if (greh->flags_and_version == htons(GRECP_FLAGSANDVERSION)) {
                 payload_offset = 8;
+            } else {
+                logger(LOG_ERROR, "Received packet with invalid gre flags.\n");
+                continue;
             }
 
             if ((payload_offset == 8) || ((runtime.reorder_buffer_timeout.tv_sec == 0) && (runtime.reorder_buffer_timeout.tv_usec == 0))) {
                 /* no sequence or reordering diabled? flush directly */
-                memset(buffer + payload_offset - 4, 0, 2); /* tun pi flags */
-                memcpy(buffer + payload_offset - 2, buffer + 2, 2); /* tun pi proto */
-                if (write(sockfd_tun, buffer + payload_offset - 4, size - payload_offset + 4) != size - payload_offset + 4) {
+                if (write(sockfd_tun, buffer + payload_offset, size - payload_offset) != size - payload_offset) {
                     logger(LOG_ERROR, "Tun device write failed: %s\n", strerror(errno));
                 }
             } else {
@@ -92,11 +93,9 @@ void *gre2tun_main() {
                 reorder_buffer.packets = realloc(reorder_buffer.packets, sizeof(struct reorder_buffer_element) * (reorder_buffer.size + 1));
                 reorder_buffer.packets[reorder_buffer.size].sequence = sequence;
                 reorder_buffer.packets[reorder_buffer.size].timestamp = get_uptime();
-                reorder_buffer.packets[reorder_buffer.size].size = size - payload_offset + 4;
+                reorder_buffer.packets[reorder_buffer.size].size = size - payload_offset;
                 reorder_buffer.packets[reorder_buffer.size].packet = malloc(reorder_buffer.packets[reorder_buffer.size].size);
-                memset(reorder_buffer.packets[reorder_buffer.size].packet, 0, 2); /* tun pi flags */
-                memcpy(reorder_buffer.packets[reorder_buffer.size].packet + 2, &greh->proto, 2); /* tun pi proto */
-                memcpy(reorder_buffer.packets[reorder_buffer.size].packet + 4, buffer + payload_offset, size - payload_offset);
+                memcpy(reorder_buffer.packets[reorder_buffer.size].packet, buffer + payload_offset, reorder_buffer.packets[reorder_buffer.size].size);
                 reorder_buffer.size++;
             }
         }
