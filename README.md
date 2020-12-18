@@ -50,12 +50,12 @@ The current versions of Linux (>=4.20) and busybox (all versions) need to be pat
 
 #### libmnl setup
 
-If you use musle cross for building gcc, ld etc. you will still miss the header file and binary of libmnl.
-You can get the header file from [here](http://www.netfilter.org/projects/libmnl/files/) and put it in the musle include dir.
+If you use musl cross for building gcc, ld etc. you will still miss the header file and binary of libmnl.
+You can get the header file from [here](http://www.netfilter.org/projects/libmnl/files/) and put it in the musl include dir.
 E.g.: `output/armv7-unknown-linux-musleabihf/include/`
 
 Either you build libmnl on your own or get a binary for your device somewhere else. (e.g. for the Turris Omnia router you can unpack the .ipk package for the library: [link](https://repo.turris.cz/omnia-stable/packages/base/libmnl_1.0.3-2_mvebu.ipk))
-Place it in the lib directory: armv7-unknown-linux-musleabihf/lib/libmnl.so
+Place it in the musl lib directory as libmnl.so
 
 ## Usage
 
