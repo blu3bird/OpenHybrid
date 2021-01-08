@@ -1,0 +1,22 @@
+Use a static value for IAID to make renewals work.
+
+--- a/networking/udhcp/d6_dhcpc.c
++++ b/networking/udhcp/d6_dhcpc.c
+@@ -645,7 +645,7 @@ static NOINLINE int send_d6_discover(uint32_t xid, struct in6_addr *requested_ip
+ 		client6_data.ia_na = xzalloc(len);
+ 		client6_data.ia_na->code = D6_OPT_IA_NA;
+ 		client6_data.ia_na->len = len - 4;
+-		*(uint32_t*)client6_data.ia_na->data = rand(); /* IAID */
++		*(uint32_t*)client6_data.ia_na->data = 1000000000; /* IAID */
+ 		if (requested_ipv6) {
+ 			struct d6_option *iaaddr = (void*)(client6_data.ia_na->data + 4+4+4);
+ 			iaaddr->code = D6_OPT_IAADDR;
+@@ -663,7 +663,7 @@ static NOINLINE int send_d6_discover(uint32_t xid, struct in6_addr *requested_ip
+ 		client6_data.ia_pd = xzalloc(len);
+ 		client6_data.ia_pd->code = D6_OPT_IA_PD;
+ 		client6_data.ia_pd->len = len - 4;
+-		*(uint32_t*)client6_data.ia_pd->data = rand(); /* IAID */
++		*(uint32_t*)client6_data.ia_pd->data = 1000000000; /* IAID */
+ 		opt_ptr = mempcpy(opt_ptr, client6_data.ia_pd, len);
+ 	}
+ 

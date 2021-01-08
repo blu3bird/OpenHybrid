@@ -1,0 +1,118 @@
+From 4f7368ae6653f941f02053c8f9ebe9d8cb10810d Mon Sep 17 00:00:00 2001
+From: Rot127 <unisono@quyllur.org>
+Date: Fri, 8 Jan 2021 21:04:23 +0100
+Subject: [PATCH] Fix issue #3 and #4
+
+---
+ src/gre2tun.c |  4 ++--
+ src/helpers.c | 32 ++++++++++++++++----------------
+ src/tun2gre.c |  4 ++--
+ src/tundev.c  |  4 ++--
+ 4 files changed, 22 insertions(+), 22 deletions(-)
+
+diff --git a/src/gre2tun.c b/src/gre2tun.c
+index c1cbe0f..a0791ef 100644
+--- a/src/gre2tun.c
++++ b/src/gre2tun.c
+@@ -24,7 +24,7 @@
+ void *gre2tun_main() {
+     char trimifname[IF_NAMESIZE-6];
+     char threadname[IF_NAMESIZE];
+-    strncpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
++    memcpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
+     sprintf(threadname, "%s-recv", trimifname);
+     pthread_setname_np(pthread_self(), threadname);
+ 
+@@ -163,4 +163,4 @@ void *gre2tun_main() {
+     }
+ 
+     /* TODO: fix memory leak on thread cancel */
+-}
+\ No newline at end of file
++}
+diff --git a/src/helpers.c b/src/helpers.c
+index e0a3fdb..b0fac77 100644
+--- a/src/helpers.c
++++ b/src/helpers.c
+@@ -51,22 +51,22 @@ struct in6_addr get_primary_ip6(char *interface) {
+     bool found = false;
+     while (19 == fscanf(fd,
+                         " %2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx %*x %x %x %*x %s",
+-                        &this_ip.__in6_u.__u6_addr8[0],
+-                        &this_ip.__in6_u.__u6_addr8[1],
+-                        &this_ip.__in6_u.__u6_addr8[2],
+-                        &this_ip.__in6_u.__u6_addr8[3],
+-                        &this_ip.__in6_u.__u6_addr8[4],
+-                        &this_ip.__in6_u.__u6_addr8[5],
+-                        &this_ip.__in6_u.__u6_addr8[6],
+-                        &this_ip.__in6_u.__u6_addr8[7],
+-                        &this_ip.__in6_u.__u6_addr8[8],
+-                        &this_ip.__in6_u.__u6_addr8[9],
+-                        &this_ip.__in6_u.__u6_addr8[10],
+-                        &this_ip.__in6_u.__u6_addr8[11],
+-                        &this_ip.__in6_u.__u6_addr8[12],
+-                        &this_ip.__in6_u.__u6_addr8[13],
+-                        &this_ip.__in6_u.__u6_addr8[14],
+-                        &this_ip.__in6_u.__u6_addr8[15],
++                        &this_ip.s6_addr[0],
++                        &this_ip.s6_addr[1],
++                        &this_ip.s6_addr[2],
++                        &this_ip.s6_addr[3],
++                        &this_ip.s6_addr[4],
++                        &this_ip.s6_addr[5],
++                        &this_ip.s6_addr[6],
++                        &this_ip.s6_addr[7],
++                        &this_ip.s6_addr[8],
++                        &this_ip.s6_addr[9],
++                        &this_ip.s6_addr[10],
++                        &this_ip.s6_addr[11],
++                        &this_ip.s6_addr[12],
++                        &this_ip.s6_addr[13],
++                        &this_ip.s6_addr[14],
++                        &this_ip.s6_addr[15],
+                         &this_prefix,
+                         &this_scope,
+                         this_ifname)) {
+diff --git a/src/tun2gre.c b/src/tun2gre.c
+index 6ded7b1..6714cb6 100644
+--- a/src/tun2gre.c
++++ b/src/tun2gre.c
+@@ -92,7 +92,7 @@ void send_gre(uint8_t tuntype, uint16_t proto, uint32_t sequence, bool include_s
+ void *tun2gre_main() {
+     char trimifname[IF_NAMESIZE-6];
+     char threadname[IF_NAMESIZE];
+-    strncpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
++    memcpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
+     sprintf(threadname, "%s-send", trimifname);
+     pthread_setname_np(pthread_self(), threadname);
+ 
+@@ -149,4 +149,4 @@ void *tun2gre_main() {
+             logger(LOG_ERROR, "Tun device read failed: %s\n", strerror(errno));
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/tundev.c b/src/tundev.c
+index c84cd6c..035d3a6 100644
+--- a/src/tundev.c
++++ b/src/tundev.c
+@@ -127,7 +127,7 @@ bool create_tun_tunnel_dev() {
+     memset(&ifr, 0, sizeof(ifr));
+     ifr.ifr_flags = IFF_TUN | IFF_NO_PI | IFF_NOFILTER;
+ 
+-    strncpy(ifr.ifr_name, runtime.tunnel_interface_name, strlen(runtime.tunnel_interface_name));
++    memcpy(ifr.ifr_name, runtime.tunnel_interface_name, strlen(runtime.tunnel_interface_name));
+ 
+     if (ioctl(sockfd_tun, TUNSETIFF, (void *)&ifr) < 0 ) {
+         logger(LOG_ERROR, "Creation of Tunnel interface '%s' failed: %s\n", runtime.tunnel_interface_name, strerror(errno));
+@@ -216,4 +216,4 @@ void open_gre_socket() {
+ 
+ void close_gre_socket() {
+     close(sockfd_gre);
+-}
+\ No newline at end of file
++}
+-- 
+2.20.1
+

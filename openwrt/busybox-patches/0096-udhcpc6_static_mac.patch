@@ -1,0 +1,29 @@
+Use 10:00:00:00:00:00 as mac for devices that don't have a mac address.
+
+--- a/networking/udhcp/d6_socket.c
++++ b/networking/udhcp/d6_socket.c
+@@ -59,7 +59,7 @@ int FAST_FUNC d6_read_interface(const char *interface, int *ifindex, struct in6_
+ 	freeifaddrs(ifap);
+ 
+ 	if (retval & (1<<0)) {
+-		/* This iface has no MAC (e.g. ppp), generate a random one */
++		/* This iface has no MAC (e.g. ppp), set a static one */
+ 		struct ifreq ifr;
+ 		int fd;
+ 
+@@ -71,9 +71,12 @@ int FAST_FUNC d6_read_interface(const char *interface, int *ifindex, struct in6_
+ 			log2("ifindex %d", *ifindex);
+ 			if (((uint32_t*)mac)[0] == 0) {
+ 				/* invent a fictitious MAC (once) */
+-				((uint32_t*)mac)[0] = rand();
+-				((uint16_t*)mac)[2] = rand();
+-				mac[0] &= 0xfc; /* make sure it's not bcast */
++				mac[0] = 0x10;
++				mac[1] = 0x00;
++				mac[2] = 0x00;
++				mac[3] = 0x00;
++				mac[4] = 0x00;
++				mac[5] = 0x00;
+ 			}
+ 			retval &= (3 - (1<<0));
+ 		}
