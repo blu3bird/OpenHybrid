@@ -92,7 +92,7 @@ void send_gre(uint8_t tuntype, uint16_t proto, uint32_t sequence, bool include_s
 void *tun2gre_main() {
     char trimifname[IF_NAMESIZE-6];
     char threadname[IF_NAMESIZE];
-    strncpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
+    memcpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
     sprintf(threadname, "%s-send", trimifname);
     pthread_setname_np(pthread_self(), threadname);
 

@@ -24,7 +24,7 @@
 void *gre2tun_main() {
     char trimifname[IF_NAMESIZE-6];
     char threadname[IF_NAMESIZE];
-    strncpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
+    memcpy(trimifname, runtime.tunnel_interface_name, IF_NAMESIZE-7);
     sprintf(threadname, "%s-recv", trimifname);
     pthread_setname_np(pthread_self(), threadname);
 

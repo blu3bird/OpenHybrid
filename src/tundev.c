@@ -127,7 +127,7 @@ bool create_tun_tunnel_dev() {
     memset(&ifr, 0, sizeof(ifr));
     ifr.ifr_flags = IFF_TUN | IFF_NO_PI | IFF_NOFILTER;
 
-    strncpy(ifr.ifr_name, runtime.tunnel_interface_name, strlen(runtime.tunnel_interface_name));
+    memcpy(ifr.ifr_name, runtime.tunnel_interface_name, strlen(runtime.tunnel_interface_name));
 
     if (ioctl(sockfd_tun, TUNSETIFF, (void *)&ifr) < 0 ) {
         logger(LOG_ERROR, "Creation of Tunnel interface '%s' failed: %s\n", runtime.tunnel_interface_name, strerror(errno));
