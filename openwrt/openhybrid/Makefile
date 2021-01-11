@@ -40,6 +40,9 @@ define Package/openhybrid/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/openhybrid $(1)/usr/sbin/
 	$(INSTALL_DIR) $(1)/etc/openhybrid
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/examples/openhybrid.conf $(1)/etc/openhybrid
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/examples/openhybrid_event.sh $(1)/etc/openhybrid
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/examples/policy-based-routing.sh $(1)/etc/openhybrid
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/examples/lte.sh $(1)/etc/openhybrid
 endef
  
 $(eval $(call BuildPackage,openhybrid,libmnl))
